@@ -17,7 +17,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    int my_port = atoi(argv[1]);
+    int my_port = std::stoi(argv[1]);
     int udp_rx_socket;
     struct sockaddr_in peer_addr;
     struct sockaddr_in my_addr = {};
