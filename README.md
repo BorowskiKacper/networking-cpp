@@ -9,3 +9,14 @@
 * Processing Time per Message: N/A
 * Maximum Latency: N/A
 * Cache Misses: N/A
+
+## Naming Convention used
+* Files: snake_case (all lowercase with _ (underscores) as separators between words)
+* Functions: PascalCase (Each word starts with an uppercase letter)
+* Variables: snake_case
+
+* c++ files: .cc
+* header files: .h
+* .inc?
+
+* namespace: fh_lob

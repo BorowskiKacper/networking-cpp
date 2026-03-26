@@ -1,9 +1,10 @@
 #include <arpa/inet.h>
+#include <sys/socket.h>
+#include <unistd.h>
+
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
-#include <sys/socket.h>
-#include <unistd.h>
 
 #define BUFFER_SIZE 1024
 
