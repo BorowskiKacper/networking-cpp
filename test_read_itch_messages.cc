@@ -3,6 +3,8 @@
 #include <vector>
 #include <arpa/inet.h>
 
+#include "include/itch_message_parser.h"
+
 using std::vector;
 
 int main()
@@ -18,15 +20,19 @@ int main()
 
     uint16_t msg_length;
 
-    while (file.read(reinterpret_cast<char *>(&msg_length), sizeof(msg_length)))
+    uint64_t i = 0;
+
+    while (file.read(reinterpret_cast<char *>(&msg_length), sizeof(msg_length)) && i < 500)
     {
         msg_length = ntohs(msg_length);
 
         vector<char> msg_buffer(msg_length);
         if (file.read(msg_buffer.data(), msg_length))
         {
-            ParseMessage(msg_buffer);
+            fh_lob::ParseMessage(msg_buffer);
         }
+
+        i++;
     }
 
     return EXIT_SUCCESS;
