@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <vector>
 #include <unordered_map>
+#include <iostream>
 
 #include "include/limit_order_book.h"
 
@@ -20,7 +21,18 @@ namespace fh_lob
     Order *OrderPool::allocate()
     {
         if (free_list.empty())
-            return nullptr;
+        {
+            size_t chunk_size = 10000;
+            Order *new_chunk = new Order[chunk_size];
+
+            for (size_t i = 0; i < chunk_size; i++)
+            {
+                free_list.push_back(&new_chunk[i]);
+            }
+
+            std::cout << "Order pool exhausted! Fallback chunk allocated" << std::endl;
+        }
+
         Order *order = free_list.back();
         free_list.pop_back();
         return order;
