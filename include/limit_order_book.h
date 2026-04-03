@@ -32,32 +32,10 @@ namespace fh_lob
 
     public:
         OrderPool(size_t capacity);
-        {
-            pool.resize(capacity);
-            free_list.reserve(capacity);
-            // Push all pointers to the free list
-            for (size_t = 0; i < capacity; i++)
-            {
-                free_list.append(&pool[i]);
-            }
-        }
 
-        Order *allocate()
-        {
-            if (free_list.empty())
-                return nullptr;
-            Order *order = free_list.back();
-            free_list.pop_back();
-            return order;
-        }
-
-        void deallocate(Order *order)
-        {
-            order->next = nullptr;
-            order->prev = nullptr;
-            free_list.push_back(order);
-        }
-    }
+        Order *allocate();
+        void deallocate(Order *order);
+    };
 
     class LimitOrderBook
     {
@@ -69,14 +47,9 @@ namespace fh_lob
 
     public:
         LimitOrderBook(size_t max_orders) : order_pool(max_orders) {}
-    }
 
-    // class LOB
-    // {
-    // public:
-    //     LOB();
-
-    // private:
-    // }
-
+        void add_order(uint64_t id, uint64_t price, uint32_t size, bool is_buy);
+        void cancel_order(uint64_t id);
+        void execute_order(uint64_t id, uint32_t exec_size);
+    };
 }

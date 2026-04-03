@@ -7,10 +7,8 @@ namespace fh_lob
 {
     void ParseAddOrder(std::vector<char> &msg_buffer)
     {
-        // std::cout << "Recognized " << msg_buffer[0] << '\n';
-        {
+        std::cout << "Recognized " << msg_buffer[0] << '\n';
         }
-    }
 
     void ParseMessage(std::vector<char> &msg_buffer)
     {
