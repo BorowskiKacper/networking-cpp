@@ -7,7 +7,8 @@
 
 namespace fh_lob
 {
-    OrderPool::OrderPool(size_t capacity)
+    template <typename T>
+    MemoryPool<T>::MemoryPool(size_t capacity)
     {
         pool.resize(capacity);
         free_list.reserve(capacity);
@@ -18,31 +19,33 @@ namespace fh_lob
         }
     }
 
-    Order *OrderPool::allocate()
+    template <typename T>
+    T *MemoryPool<T>::allocate()
     {
         if (free_list.empty())
         {
             size_t chunk_size = 10000;
-            Order *new_chunk = new Order[chunk_size];
+            T *new_chunk = new T[chunk_size];
 
             for (size_t i = 0; i < chunk_size; i++)
             {
                 free_list.push_back(&new_chunk[i]);
             }
 
-            std::cout << "Order pool exhausted! Fallback chunk allocated" << std::endl;
+            std::cout << "Memory pool exhausted! Fallback chunk allocated" << std::endl;
         }
 
-        Order *order = free_list.back();
+        T *type = free_list.back();
         free_list.pop_back();
-        return order;
+        return type;
     }
 
-    void OrderPool::deallocate(Order *order)
+    template <typename T>
+    void MemoryPool<T>::deallocate(T *type)
     {
-        order->next = nullptr;
-        order->prev = nullptr;
-        free_list.push_back(order);
+        type->next = nullptr;
+        type->prev = nullptr;
+        free_list.push_back(type);
     }
 
     void LimitOrderBook::add_order(uint64_t id, uint64_t price, uint32_t size, bool is_buy)
@@ -55,10 +58,18 @@ namespace fh_lob
 
         order_map[id] = order;
 
+        PriceLevel *level;
         if (price_map.find(price) == price_map.end())
-            price_map[price] = new PriceLevel{price};
+        {
+            level = price_level_pool.allocate();
+            level->price = price;
+            price_map[price] = level;
+        }
+        else
+        {
+            level = price_map[price];
+        }
 
-        PriceLevel *level = price_map[price];
         level->total_volume += size;
 
         if (!level->head)
@@ -94,7 +105,7 @@ namespace fh_lob
         level->total_volume -= order->size;
         if (level->total_volume == 0)
         {
-            delete level;
+            price_level_pool.deallocate(level);
             price_map.erase(order->price);
         }
 

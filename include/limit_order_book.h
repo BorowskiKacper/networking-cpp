@@ -24,29 +24,31 @@ namespace fh_lob
         Order *tail = nullptr;
     };
 
-    class OrderPool
+    template <typename T>
+    class MemoryPool
     {
     private:
-        std::vector<Order> pool;
-        std::vector<Order *> free_list;
+        std::vector<T> pool;
+        std::vector<T *> free_list;
 
     public:
-        OrderPool(size_t capacity);
+        MemoryPool(size_t capacity);
 
-        Order *allocate();
-        void deallocate(Order *order);
+        T *allocate();
+        void deallocate(T *type);
     };
 
     class LimitOrderBook
     {
     private:
-        OrderPool order_pool;
+        MemoryPool<Order> order_pool;
+        MemoryPool<PriceLevel> price_level_pool;
 
         std::unordered_map<uint64_t, Order *> order_map;
         std::unordered_map<uint64_t, PriceLevel *> price_map;
 
     public:
-        LimitOrderBook(size_t max_orders) : order_pool(max_orders) {}
+        LimitOrderBook(size_t max_orders) : order_pool(max_orders), price_level_pool(max_orders) {}
 
         void add_order(uint64_t id, uint64_t price, uint32_t size, bool is_buy);
         void cancel_order(uint64_t id);
