@@ -43,8 +43,6 @@ namespace fh_lob
     template <typename T>
     void MemoryPool<T>::deallocate(T *type)
     {
-        type->next = nullptr;
-        type->prev = nullptr;
         free_list.push_back(type);
     }
 
@@ -55,6 +53,9 @@ namespace fh_lob
         order->price = price;
         order->size = size;
         order->is_buy = is_buy;
+
+        order->next = nullptr;
+        order->prev = nullptr;
 
         order_map[id] = order;
 
