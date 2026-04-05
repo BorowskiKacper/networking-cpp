@@ -122,7 +122,7 @@ namespace fh_lob
 
         Order *order = it->second;
 
-        if (order->size >= exec_size)
+        if (order->size <= exec_size)
             cancel_order(id);
         else
         {
