@@ -38,7 +38,7 @@ int main(int argc, char **argv)
         {
             .sin_family = AF_INET,
             .sin_port = htons(port),
-            .sin_addr.s_addr = INADDR_ANY};
+            .sin_addr = {.s_addr = INADDR_ANY}};
 
     if (bind(udp_fd, (sockaddr *)&local_addr, sizeof(local_addr)) < 0)
     {
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    struct ip_mreq multicast_req = {.imr_interface.s_addr = INADDR_ANY};
+    struct ip_mreq multicast_req = {.imr_interface = {.s_addr = INADDR_ANY}};
     if (inet_pton(AF_INET, multicast_ip, &(multicast_req.imr_multiaddr.s_addr)) <= 0)
     {
         perror("Something went wrong with the IP address");
@@ -66,6 +66,8 @@ int main(int argc, char **argv)
     struct sockaddr_in sender_addr;
     socklen_t sender_len = sizeof(sender_addr);
 
+    size_t i = 0;
+
     while (true)
     {
         memset(buffer, 0, BUFFER_SIZE);
@@ -77,8 +79,9 @@ int main(int argc, char **argv)
         }
         else
         {
-            std::cout << received << std::endl;
+            std::cout << i << std::endl;
         }
+        i++;
     }
 
     close(udp_fd);
