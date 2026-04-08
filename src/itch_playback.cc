@@ -81,6 +81,8 @@ int main(int argc, char *argv[])
 
         if (moldudp64_index + msg_length + 2 >= MAX_MOLDUDP64_SIZE)
         {
+            uint64_t NBO_sequence_number = htobe64(sequence_number);
+            uint16_t NBO_message_count = htons(message_count);
             memcpy(moldudp64_buffer + 10, &sequence_number, sizeof(sequence_number));
             memcpy(moldudp64_buffer + 18, &message_count, sizeof(message_count));
             if (sendto(udp_fd, moldudp64_buffer, moldudp64_index, 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
@@ -107,7 +109,30 @@ int main(int argc, char *argv[])
 
             return EXIT_FAILURE;
         }
+        moldudp64_index += msg_length;
     }
+
+    if (message_count > 0)
+    {
+        uint64_t NBO_sequence_number = htobe64(sequence_number);
+        uint16_t NBO_message_count = htons(message_count);
+        memcpy(moldudp64_buffer + 10, &sequence_number, sizeof(sequence_number));
+        memcpy(moldudp64_buffer + 18, &message_count, sizeof(message_count));
+        if (sendto(udp_fd, moldudp64_buffer, moldudp64_index, 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
+        {
+            perror("Failed to send message");
+            close(udp_fd);
+            return EXIT_FAILURE;
+        };
+        std::cout << i++ << " | " << moldudp64_index << " | ";
+        print_buffer(moldudp64_buffer, moldudp64_index);
+
+        moldudp64_index = 20;
+        sequence_number += message_count;
+        message_count = 0;
+    }
+
+    delete[] moldudp64_buffer;
     close(udp_fd);
 
     return EXIT_SUCCESS;
