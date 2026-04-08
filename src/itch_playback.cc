@@ -5,8 +5,9 @@
 #include <fstream>
 #include <vector>
 #include <arpa/inet.h>
+#include <cstring>
 
-void print_buffer(std::vector<char> &msg_buffer, uint16_t msg_length)
+void print_buffer(char *msg_buffer, size_t msg_length)
 {
     if (msg_length > 0)
         std::cout << msg_buffer[0] << " ";
@@ -15,7 +16,7 @@ void print_buffer(std::vector<char> &msg_buffer, uint16_t msg_length)
         std::cout << std::hex << std::setw(2) << std::setfill('0')
                   << (static_cast<unsigned int>(static_cast<unsigned char>(msg_buffer[i]))) << " ";
     }
-    std::cout << std::dec;
+    std::cout << std::dec << std::endl;
 }
 
 // namespace fh_lob
@@ -64,22 +65,48 @@ int main(int argc, char *argv[])
 
     uint64_t i = 0;
 
+    size_t MAX_MOLDUDP64_SIZE = 1472;
+    char *moldudp64_buffer = new char[MAX_MOLDUDP64_SIZE];
+    size_t moldudp64_index = 20;
+    uint64_t sequence_number = 0;
+    uint16_t message_count = 0;
+
+    ////////////////////////////////
+    // If PACKET > MAX_SIZE: sendto() and clear PACKET
+    // always: add to packet
+    // after read through everything in file: sendto()
     while (file.read(reinterpret_cast<char *>(&msg_length), sizeof(msg_length)))
     {
         msg_length = ntohs(msg_length);
 
-        std::vector<char> msg_buffer(msg_length);
-
-        file.read(msg_buffer.data(), msg_length);
-
-        if (sendto(udp_fd, msg_buffer.data(), msg_length, 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
+        if (moldudp64_index + msg_length + 2 >= MAX_MOLDUDP64_SIZE)
         {
-            perror("Failed to send message");
-            close(udp_fd);
-            return EXIT_FAILURE;
-        };
+            memcpy(moldudp64_buffer + 10, &sequence_number, sizeof(sequence_number));
+            memcpy(moldudp64_buffer + 18, &message_count, sizeof(message_count));
+            if (sendto(udp_fd, moldudp64_buffer, moldudp64_index, 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
+            {
+                perror("Failed to send message");
+                close(udp_fd);
+                return EXIT_FAILURE;
+            };
+            std::cout << i++ << " | " << moldudp64_index << " | ";
+            print_buffer(moldudp64_buffer, moldudp64_index);
 
-        i++;
+            moldudp64_index = 20;
+            sequence_number += message_count;
+            message_count = 0;
+        }
+
+        message_count++;
+        memcpy(moldudp64_buffer + moldudp64_index, &msg_length, sizeof(msg_length));
+        moldudp64_index += 2;
+
+        if (!file.read(moldudp64_buffer + moldudp64_index, msg_length))
+        {
+            perror("Error reading file");
+
+            return EXIT_FAILURE;
+        }
     }
     close(udp_fd);
 
