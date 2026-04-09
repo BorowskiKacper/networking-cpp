@@ -19,6 +19,28 @@ void print_buffer(char *msg_buffer, size_t msg_length)
     std::cout << std::dec << std::endl;
 }
 
+int SendMoldUDP64Packet(int udp_fd, sockaddr_in &multicast_addr, char *&moldudp64_buffer, size_t &moldudp64_index, uint64_t &sequence_number, uint16_t &message_count)
+{
+    uint64_t net_sequence_number = htobe64(sequence_number);
+    uint16_t net_message_count = htons(message_count);
+    memcpy(moldudp64_buffer + 10, &net_sequence_number, sizeof(net_sequence_number));
+    memcpy(moldudp64_buffer + 18, &net_message_count, sizeof(net_message_count));
+
+    if (sendto(udp_fd, moldudp64_buffer, moldudp64_index, 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
+    {
+        perror("Failed to send message");
+        close(udp_fd);
+        return EXIT_FAILURE;
+    };
+    print_buffer(moldudp64_buffer, moldudp64_index);
+
+    moldudp64_index = 20;
+    sequence_number += message_count;
+    message_count = 0;
+
+    return EXIT_SUCCESS;
+}
+
 // namespace fh_lob
 int main(int argc, char *argv[])
 {
@@ -66,70 +88,50 @@ int main(int argc, char *argv[])
     uint64_t i = 0;
 
     size_t MAX_MOLDUDP64_SIZE = 1472;
-    char *moldudp64_buffer = new char[MAX_MOLDUDP64_SIZE];
+    char *moldudp64_buffer = new char[MAX_MOLDUDP64_SIZE]{};
+    const char *session_id = "Session123";
+    memcpy(moldudp64_buffer, session_id, 10);
     size_t moldudp64_index = 20;
-    uint64_t sequence_number = 0;
+    uint64_t sequence_number = 1;
     uint16_t message_count = 0;
 
     ////////////////////////////////
-    // If PACKET > MAX_SIZE: sendto() and clear PACKET
+    // If PACKET > MAX_SIZE: sendto() and clear packet
     // always: add to packet
     // after read through everything in file: sendto()
     while (file.read(reinterpret_cast<char *>(&msg_length), sizeof(msg_length)))
     {
-        msg_length = ntohs(msg_length);
+        uint16_t host_msg_length = ntohs(msg_length);
 
-        if (moldudp64_index + msg_length + 2 >= MAX_MOLDUDP64_SIZE)
+        if (moldudp64_index + host_msg_length + 2 >= MAX_MOLDUDP64_SIZE)
         {
-            uint64_t NBO_sequence_number = htobe64(sequence_number);
-            uint16_t NBO_message_count = htons(message_count);
-            memcpy(moldudp64_buffer + 10, &sequence_number, sizeof(sequence_number));
-            memcpy(moldudp64_buffer + 18, &message_count, sizeof(message_count));
-            if (sendto(udp_fd, moldudp64_buffer, moldudp64_index, 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
+            int res = SendMoldUDP64Packet(udp_fd, multicast_addr, moldudp64_buffer, moldudp64_index, sequence_number, message_count);
+            if (res == EXIT_FAILURE)
             {
-                perror("Failed to send message");
-                close(udp_fd);
                 return EXIT_FAILURE;
-            };
-            std::cout << i++ << " | " << moldudp64_index << " | ";
-            print_buffer(moldudp64_buffer, moldudp64_index);
-
-            moldudp64_index = 20;
-            sequence_number += message_count;
-            message_count = 0;
+            }
         }
 
         message_count++;
         memcpy(moldudp64_buffer + moldudp64_index, &msg_length, sizeof(msg_length));
         moldudp64_index += 2;
 
-        if (!file.read(moldudp64_buffer + moldudp64_index, msg_length))
+        if (!file.read(moldudp64_buffer + moldudp64_index, host_msg_length))
         {
             perror("Error reading file");
 
             return EXIT_FAILURE;
         }
-        moldudp64_index += msg_length;
+        moldudp64_index += host_msg_length;
     }
 
     if (message_count > 0)
     {
-        uint64_t NBO_sequence_number = htobe64(sequence_number);
-        uint16_t NBO_message_count = htons(message_count);
-        memcpy(moldudp64_buffer + 10, &sequence_number, sizeof(sequence_number));
-        memcpy(moldudp64_buffer + 18, &message_count, sizeof(message_count));
-        if (sendto(udp_fd, moldudp64_buffer, moldudp64_index, 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
+        int res = SendMoldUDP64Packet(udp_fd, multicast_addr, moldudp64_buffer, moldudp64_index, sequence_number, message_count);
+        if (res == EXIT_FAILURE)
         {
-            perror("Failed to send message");
-            close(udp_fd);
             return EXIT_FAILURE;
-        };
-        std::cout << i++ << " | " << moldudp64_index << " | ";
-        print_buffer(moldudp64_buffer, moldudp64_index);
-
-        moldudp64_index = 20;
-        sequence_number += message_count;
-        message_count = 0;
+        }
     }
 
     delete[] moldudp64_buffer;
