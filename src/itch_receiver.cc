@@ -6,7 +6,9 @@
 // #include <cstdlib>
 #include <cstring>
 
-#define BUFFER_SIZE 1024
+#include "itch_message_parser.h"
+
+#define BUFFER_SIZE 1472
 
 int main(int argc, char **argv)
 {
@@ -79,7 +81,8 @@ int main(int argc, char **argv)
         }
         else
         {
-            std::cout << i << std::endl;
+            // std::cout << i << std::endl;
+            fh_lob::ParseMoldUDP64(buffer);
         }
         i++;
     }
