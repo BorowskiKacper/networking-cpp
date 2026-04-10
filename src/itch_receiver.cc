@@ -6,7 +6,7 @@
 // #include <cstdlib>
 #include <cstring>
 
-#include "itch_message_parser.h"
+#include "../include/itch_message_parser.h"
 
 #define BUFFER_SIZE 1472
 

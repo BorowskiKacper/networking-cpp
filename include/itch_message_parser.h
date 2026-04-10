@@ -1,10 +1,10 @@
-
+#pragma once
 
 #include <vector>
 
 namespace fh_lob
 {
-    void ParseAddOrder(std::vector<char> &msg_buffer);
-    void ParseMessage(std::vector<char> &msg_buffer);
-    void ParseMoldUDP64(std::vector<char> &msg_buffer);
+    void ParseAddOrder(char *msg_buffer, size_t size);
+    void ParseMessage(char *msg_buffer, size_t size);
+    void ParseMoldUDP64(char *msg_buffer);
 }

@@ -29,21 +29,21 @@ namespace fh_lob
         }
     }
 
-    void ParseMoldUDP64(std::vector<char> &msg_buffer)
+    void ParseMoldUDP64(char *msg_buffer)
     {
         uint64_t sequence_number;
         uint16_t message_count;
-        memcpy(&sequence_number, msg_buffer.data() + 10, sizeof(sequence_number));
-        memcpy(&message_count, msg_buffer.data() + 18, sizeof(message_count));
-        uint64_t sequence_number = be64toh(sequence_number);
-        uint16_t message_count = ntohs(message_count);
+        memcpy(&sequence_number, msg_buffer + 10, sizeof(sequence_number));
+        memcpy(&message_count, msg_buffer + 18, sizeof(message_count));
+        sequence_number = be64toh(sequence_number);
+        message_count = ntohs(message_count);
 
         uint16_t message_length;
         for (size_t i = 20; message_count > 0; message_count--, i += 2 + message_length)
         {
-            memcpy(&message_length, msg_buffer.data() + i, sizeof(message_length));
+            memcpy(&message_length, msg_buffer + i, sizeof(message_length));
             message_length = ntohs(message_length);
-            ParseMessage(msg_buffer.data() + i + 2, message_length);
+            ParseMessage(msg_buffer + i + 2, message_length);
         }
     }
 }
