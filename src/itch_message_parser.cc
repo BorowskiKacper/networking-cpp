@@ -10,7 +10,7 @@
 
 namespace fh_lob
 {
-    void SystemEventMessage(char *msg_buffer, size_t size)
+    void SystemEventMessage(char *msg_buffer)
     {
         assert(msg_buffer[0] == 'S' && size == 12);
 
@@ -39,34 +39,70 @@ namespace fh_lob
         std::cout << print << std::endl;
     }
 
-    void StockDirectoryMessage(char *msg_buffer, size_t size)
+    void StockDirectoryMessage(char *msg_buffer)
     {
         assert(msg_buffer[0] == 'R' && size == 39);
 
-        // std::cout <<
+        std::cout << msg_buffer[0] << std::endl;
     }
 
-    void ParseAddOrder(char *msg_buffer, size_t size)
+    void ParseAddOrder(char *msg_buffer)
     {
         // std::cout << "Recognized " << msg_buffer[0] << '\n';
     }
 
-    void ParseMessage(char *msg_buffer, size_t size)
+    void ParseAddMPIDOrder(char *msg_buffer)
+    {
+    }
+    void ParseOrderExecuted(char *msg_buffer)
+    {
+    }
+    void ParseOrderExecutedPrice(char *msg_buffer)
+    {
+    }
+    void ParseOrderCancel(char *msg_buffer)
+    {
+    }
+    void ParseOrderDelete(char *msg_buffer)
+    {
+    }
+    void ParseOrderReplace(char *msg_buffer)
+    {
+    }
+
+    void ParseMessage(char *msg_buffer)
     {
         switch (msg_buffer[0])
         {
         case 'S':
-            SystemEventMessage(msg_buffer, size);
+            SystemEventMessage(msg_buffer);
             break;
         case 'R':
-            StockDirectoryMessage(msg_buffer, size);
+            StockDirectoryMessage(msg_buffer);
             break;
         case 'A':
-            // ParseAddOrder(msg_buffer, size);
-            // std::cout << "A\n";
+            ParseAddOrder(msg_buffer);
+            break;
+        case 'F':
+            ParseAddMPIDOrder(msg_buffer);
+            break;
+        case 'E':
+            ParseOrderExecuted(msg_buffer);
+            break;
+        case 'C':
+            ParseOrderExecutedPrice(msg_buffer);
+            break;
+        case 'X':
+            ParseOrderCancel(msg_buffer);
+            break;
+        case 'D':
+            ParseOrderDelete(msg_buffer);
+            break;
+        case 'U':
+            ParseOrderReplace(msg_buffer);
             break;
         default:
-            // std::cout << "Unrecognized code: " << msg_buffer[0] << '\n';
+            // Ignore non-LOB messages silently
             {
             }
         }
@@ -86,7 +122,7 @@ namespace fh_lob
         {
             memcpy(&message_length, msg_buffer + i, sizeof(message_length));
             message_length = ntohs(message_length);
-            ParseMessage(msg_buffer + i + 2, message_length);
+            ParseMessage(msg_buffer + i + 2);
         }
     }
 }

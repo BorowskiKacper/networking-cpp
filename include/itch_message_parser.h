@@ -101,7 +101,14 @@ namespace fh_lob
 
 #pragma pack(pop) // Restore default alignment
 
-    void ParseAddOrder(char *msg_buffer, size_t size);
-    void ParseMessage(char *msg_buffer, size_t size);
+    void ParseAddOrder(char *msg_buffer);
+    void ParseAddMPIDOrder(char *msg_buffer);
+    void ParseOrderExecuted(char *msg_buffer);
+    void ParseOrderExecutedPrice(char *msg_buffer);
+    void ParseOrderCancel(char *msg_buffer);
+    void ParseOrderDelete(char *msg_buffer);
+    void ParseOrderReplace(char *msg_buffer);
+
+    void ParseMessage(char *msg_buffer);
     void ParseMoldUDP64(char *msg_buffer);
 }
