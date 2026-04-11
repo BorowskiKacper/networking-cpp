@@ -46,6 +46,23 @@ namespace fh_lob
         free_list.push_back(type);
     }
 
+    void LimitOrderBook::ReduceOrderSize(uint64_t id, uint32_t shares)
+    {
+        auto it = order_map.find(id);
+        if (it == order_map.end())
+            return;
+
+        Order *order = it->second;
+
+        if (order->shares <= shares)
+            CancelOrder(id);
+        else
+        {
+            order->shares -= shares;
+            price_map[order->price]->total_volume -= shares;
+        }
+    }
+
     void LimitOrderBook::AddOrder(uint64_t id, char side, uint32_t shares, uint32_t price)
     {
         Order *order = order_pool.allocate();

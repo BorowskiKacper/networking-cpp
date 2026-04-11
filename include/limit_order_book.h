@@ -49,6 +49,8 @@ namespace fh_lob
         std::unordered_map<uint64_t, Order *> order_map;
         std::unordered_map<uint32_t, PriceLevel *> price_map;
 
+        void ReduceOrderSize(uint64_t id, uint32_t shares);
+
     public:
         LimitOrderBook(size_t max_orders) : order_pool(max_orders), price_level_pool(max_orders) {}
 
