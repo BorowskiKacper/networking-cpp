@@ -52,8 +52,8 @@ namespace fh_lob
     public:
         LimitOrderBook(size_t max_orders) : order_pool(max_orders), price_level_pool(max_orders) {}
 
-        void add_order(uint64_t id, uint64_t price, uint32_t size, bool is_buy);
-        void cancel_order(uint64_t id);
-        void execute_order(uint64_t id, uint32_t exec_size);
+        void AddOrder(uint64_t id, uint64_t price, uint32_t size, bool is_buy);
+        void CancelOrder(uint64_t id);
+        void ExecuteOrder(uint64_t id, uint32_t exec_size);
     };
 }

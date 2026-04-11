@@ -46,7 +46,7 @@ namespace fh_lob
         free_list.push_back(type);
     }
 
-    void LimitOrderBook::add_order(uint64_t id, uint64_t price, uint32_t size, bool is_buy)
+    void LimitOrderBook::AddOrder(uint64_t id, uint64_t price, uint32_t size, bool is_buy)
     {
         Order *order = order_pool.allocate();
         order->id = id;
@@ -85,7 +85,7 @@ namespace fh_lob
             level->tail = order;
         }
     }
-    void LimitOrderBook::cancel_order(uint64_t id)
+    void LimitOrderBook::CancelOrder(uint64_t id)
     {
         auto it = order_map.find(id);
         if (it == order_map.end())
@@ -114,7 +114,7 @@ namespace fh_lob
         order_pool.deallocate(order);
     }
 
-    void LimitOrderBook::execute_order(uint64_t id, uint32_t exec_size)
+    void LimitOrderBook::ExecuteOrder(uint64_t id, uint32_t exec_size)
     {
         auto it = order_map.find(id);
         if (it == order_map.end())
@@ -123,7 +123,7 @@ namespace fh_lob
         Order *order = it->second;
 
         if (order->size <= exec_size)
-            cancel_order(id);
+            CancelOrder(id);
         else
         {
             order->size -= exec_size;
