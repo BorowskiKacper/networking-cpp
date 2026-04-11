@@ -146,4 +146,30 @@ namespace fh_lob
         order_pool.deallocate(order);
     }
 
+    void LimitOrderBook::ReplaceOrder(uint64_t old_id, uint64_t new_id, uint32_t shares, uint32_t new_price)
+    {
+        auto it = order_map.find(old_id);
+        if (it == order_map.end())
+            return; // Order not found
+
+        Order *order = it->second;
+        PriceLevel *level = price_map[order->price];
+
+        // REVISIT: is this implementation correct? should I ignore how many shares there were previously or not?
+        char side = order->side;
+        DeleteOrder(old_id);
+        AddOrder(new_id, side, shares, new_price);
+        // if (level->price != new_price || order->shares < shares)
+        // {
+        //     char side = order->side;
+        //     DeleteOrder(old_id);
+        //     AddOrder(new_id, side, shares, new_price);
+        // }
+        // else
+        // {
+        //     ReduceOrderSize(old_id, order->shares - shares);
+        //     // replace old_id with new_id
+        // }
+    }
+
 }
