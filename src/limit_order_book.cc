@@ -46,13 +46,13 @@ namespace fh_lob
         free_list.push_back(type);
     }
 
-    void LimitOrderBook::AddOrder(uint64_t id, uint64_t price, uint32_t size, bool is_buy)
+    void LimitOrderBook::AddOrder(uint64_t id, char side, uint32_t shares, uint32_t price)
     {
         Order *order = order_pool.allocate();
         order->id = id;
+        order->side = side;
+        order->shares = shares;
         order->price = price;
-        order->size = size;
-        order->is_buy = is_buy;
 
         order->next = nullptr;
         order->prev = nullptr;
@@ -71,7 +71,7 @@ namespace fh_lob
             level = price_map[price];
         }
 
-        level->total_volume += size;
+        level->total_volume += shares;
 
         if (!level->head)
         {
@@ -85,7 +85,8 @@ namespace fh_lob
             level->tail = order;
         }
     }
-    void LimitOrderBook::CancelOrder(uint64_t id)
+
+    void LimitOrderBook::CancelOrder(uint64_t id, uint32_t shares)
     {
         auto it = order_map.find(id);
         if (it == order_map.end())
@@ -103,7 +104,7 @@ namespace fh_lob
         else
             level->head = order->next;
 
-        level->total_volume -= order->size;
+        level->total_volume -= order->shares;
         if (level->total_volume == 0)
         {
             price_level_pool.deallocate(level);
@@ -114,7 +115,7 @@ namespace fh_lob
         order_pool.deallocate(order);
     }
 
-    void LimitOrderBook::ExecuteOrder(uint64_t id, uint32_t exec_size)
+    void LimitOrderBook::ExecuteOrder(uint64_t id, uint32_t shares)
     {
         auto it = order_map.find(id);
         if (it == order_map.end())
@@ -122,12 +123,12 @@ namespace fh_lob
 
         Order *order = it->second;
 
-        if (order->size <= exec_size)
+        if (order->shares <= shares)
             CancelOrder(id);
         else
         {
-            order->size -= exec_size;
-            price_map[order->price]->total_volume -= exec_size;
+            order->shares -= shares;
+            price_map[order->price]->total_volume -= shares;
         }
     }
 
