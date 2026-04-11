@@ -55,7 +55,7 @@ namespace fh_lob
         Order *order = it->second;
 
         if (order->shares <= shares)
-            CancelOrder(id);
+            DeleteOrder(id);
         else
         {
             order->shares -= shares;
@@ -102,8 +102,22 @@ namespace fh_lob
             level->tail = order;
         }
     }
+    void LimitOrderBook::ExecuteOrder(uint64_t id, uint32_t shares)
+    {
+        ReduceOrderSize(id, shares);
+    }
+
+    void LimitOrderBook::ExecuteOrderWithPrice(uint64_t id, uint32_t shares, uint32_t price)
+    {
+        ReduceOrderSize(id, shares);
+    }
 
     void LimitOrderBook::CancelOrder(uint64_t id, uint32_t shares)
+    {
+        ReduceOrderSize(id, shares);
+    }
+
+    void LimitOrderBook::DeleteOrder(uint64_t id)
     {
         auto it = order_map.find(id);
         if (it == order_map.end())
@@ -130,23 +144,6 @@ namespace fh_lob
 
         order_map.erase(id);
         order_pool.deallocate(order);
-    }
-
-    void LimitOrderBook::ExecuteOrder(uint64_t id, uint32_t shares)
-    {
-        auto it = order_map.find(id);
-        if (it == order_map.end())
-            return;
-
-        Order *order = it->second;
-
-        if (order->shares <= shares)
-            CancelOrder(id);
-        else
-        {
-            order->shares -= shares;
-            price_map[order->price]->total_volume -= shares;
-        }
     }
 
 }
