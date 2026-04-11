@@ -6,24 +6,67 @@
 #include <vector>
 #include <arpa/inet.h>
 #include <cstring>
+#include <cassert>
 
 namespace fh_lob
 {
+    void SystemEventMessage(char *msg_buffer, size_t size)
+    {
+        assert(msg_buffer[0] == 'S' && size == 12);
+
+        std::string print;
+        switch (msg_buffer[11])
+        {
+        case 'O':
+            print = "Start of Messages";
+            break;
+        case 'S':
+            print = "Start of System Hours";
+            break;
+        case 'Q':
+            print = "Start of Market Hours";
+            break;
+        case 'M':
+            print = "End of Market Hours";
+            break;
+        case 'E':
+            print = "End of System Hours";
+            break;
+        case 'C':
+            print = "End of Messages";
+            break;
+        }
+        std::cout << print << std::endl;
+    }
+
+    void StockDirectoryMessage(char *msg_buffer, size_t size)
+    {
+        assert(msg_buffer[0] == 'R' && size == 39);
+
+        // std::cout <<
+    }
+
     void ParseAddOrder(char *msg_buffer, size_t size)
     {
-        std::cout << "Recognized " << msg_buffer[0] << '\n';
+        // std::cout << "Recognized " << msg_buffer[0] << '\n';
     }
 
     void ParseMessage(char *msg_buffer, size_t size)
     {
         switch (msg_buffer[0])
         {
+        case 'S':
+            SystemEventMessage(msg_buffer, size);
+            break;
+        case 'R':
+            StockDirectoryMessage(msg_buffer, size);
+            break;
         case 'A':
             // ParseAddOrder(msg_buffer, size);
-            std::cout << "A\n";
+            // std::cout << "A\n";
             break;
         default:
-            std::cout << "Unrecognized code: " << msg_buffer[0] << '\n';
+            // std::cout << "Unrecognized code: " << msg_buffer[0] << '\n';
             {
             }
         }
