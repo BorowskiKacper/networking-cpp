@@ -104,14 +104,14 @@ namespace fh_lob
 
 #pragma pack(pop) // Restore default alignment
 
-    void ParseAddOrder(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
-    void ParseAddMPIDOrder(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
-    void ParseOrderExecuted(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
-    void ParseOrderExecutedPrice(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
-    void ParseOrderCancel(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
-    void ParseOrderDelete(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
-    void ParseOrderReplace(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
+    void ParseAddOrder(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
+    void ParseAddMPIDOrder(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
+    void ParseOrderExecuted(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
+    void ParseOrderExecutedPrice(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
+    void ParseOrderCancel(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
+    void ParseOrderDelete(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
+    void ParseOrderReplace(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
 
-    void ParseMessage(char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
-    void ParseMoldUDP64(char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
+    void ParseMessage(char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
+    void ParseMoldUDP64(char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
 }

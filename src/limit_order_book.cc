@@ -3,49 +3,10 @@
 #include <unordered_map>
 #include <iostream>
 
-#include "include/limit_order_book.h"
+#include "../include/limit_order_book.h"
 
 namespace fh_lob
 {
-    template <typename T>
-    MemoryPool<T>::MemoryPool(size_t capacity)
-    {
-        pool.resize(capacity);
-        free_list.reserve(capacity);
-        // Push all pointers to the free list
-        for (size_t i = 0; i < capacity; i++)
-        {
-            free_list.push_back(&pool[i]);
-        }
-    }
-
-    template <typename T>
-    T *MemoryPool<T>::allocate()
-    {
-        if (free_list.empty())
-        {
-            size_t chunk_size = 10000;
-            T *new_chunk = new T[chunk_size];
-
-            for (size_t i = 0; i < chunk_size; i++)
-            {
-                free_list.push_back(&new_chunk[i]);
-            }
-
-            std::cout << "Memory pool exhausted! Fallback chunk allocated" << std::endl;
-        }
-
-        T *type = free_list.back();
-        free_list.pop_back();
-        return type;
-    }
-
-    template <typename T>
-    void MemoryPool<T>::deallocate(T *type)
-    {
-        free_list.push_back(type);
-    }
-
     void LimitOrderBook::ReduceOrderSize(uint64_t id, uint32_t shares)
     {
         auto it = order_map.find(id);

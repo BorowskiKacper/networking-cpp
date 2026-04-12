@@ -71,7 +71,7 @@ int main(int argc, char **argv)
     socklen_t sender_len = sizeof(sender_addr);
 
     std::unordered_map<std::string, uint16_t> locate_map;
-    std::unordered_map<uint16_t, fh_lob::LimitOrderBook> lob_map;
+    std::unordered_map<uint16_t, fh_lob::LimitOrderBook *> lob_map;
 
     size_t i = 0;
 
