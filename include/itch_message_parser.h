@@ -1,6 +1,9 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
+
+#include "../include/limit_order_book.h"
 
 namespace fh_lob
 {
@@ -101,14 +104,14 @@ namespace fh_lob
 
 #pragma pack(pop) // Restore default alignment
 
-    void ParseAddOrder(char *msg_buffer);
-    void ParseAddMPIDOrder(char *msg_buffer);
-    void ParseOrderExecuted(char *msg_buffer);
-    void ParseOrderExecutedPrice(char *msg_buffer);
-    void ParseOrderCancel(char *msg_buffer);
-    void ParseOrderDelete(char *msg_buffer);
-    void ParseOrderReplace(char *msg_buffer);
+    void ParseAddOrder(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
+    void ParseAddMPIDOrder(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
+    void ParseOrderExecuted(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
+    void ParseOrderExecutedPrice(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
+    void ParseOrderCancel(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
+    void ParseOrderDelete(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
+    void ParseOrderReplace(char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
 
-    void ParseMessage(char *msg_buffer);
-    void ParseMoldUDP64(char *msg_buffer);
+    void ParseMessage(char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
+    void ParseMoldUDP64(char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook> &lob_map);
 }

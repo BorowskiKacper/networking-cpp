@@ -5,8 +5,10 @@
 #include <iostream>
 // #include <cstdlib>
 #include <cstring>
+#include <unordered_map>
 
 #include "../include/itch_message_parser.h"
+#include "../include/limit_order_book.h"
 
 #define BUFFER_SIZE 1472
 
@@ -68,6 +70,9 @@ int main(int argc, char **argv)
     struct sockaddr_in sender_addr;
     socklen_t sender_len = sizeof(sender_addr);
 
+    std::unordered_map<std::string, uint16_t> locate_map;
+    std::unordered_map<uint16_t, fh_lob::LimitOrderBook> lob_map;
+
     size_t i = 0;
 
     while (true)
@@ -82,7 +87,7 @@ int main(int argc, char **argv)
         else
         {
             // std::cout << i << std::endl;
-            fh_lob::ParseMoldUDP64(buffer);
+            fh_lob::ParseMoldUDP64(buffer, locate_map, lob_map);
         }
         i++;
     }
