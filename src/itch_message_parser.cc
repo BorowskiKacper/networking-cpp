@@ -51,49 +51,67 @@ namespace fh_lob
     void ParseAddOrder(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const AddOrderMsg *>(msg_buffer);
-
-        lob_map[msg->header.stock_locate]->AddOrder(msg->order_ref_number,
-                                                    msg->buy_sell_indicator,
-                                                    msg->shares,
-                                                    msg->price);
+        uint16_t locate = ntohs(msg->header.stock_locate);
+        auto it = lob_map.find(locate);
+        if (it == lob_map.end())
+            return;
+        it->second->AddOrder(msg->order_ref_number,
+                             msg->buy_sell_indicator,
+                             msg->shares,
+                             msg->price);
     }
 
     void ParseOrderExecuted(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const OrderExecutedMsg *>(msg_buffer);
-
-        lob_map[msg->header.stock_locate]->ExecuteOrder(msg->order_ref_number,
-                                                        msg->executed_shares);
+        uint16_t locate = ntohs(msg->header.stock_locate);
+        auto it = lob_map.find(locate);
+        if (it == lob_map.end())
+            return;
+        it->second->ExecuteOrder(msg->order_ref_number,
+                                 msg->executed_shares);
     }
     void ParseOrderExecutedPrice(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const OrderExecutedPriceMsg *>(msg_buffer);
-
-        lob_map[msg->header.stock_locate]->ExecuteOrderWithPrice(msg->order_ref_number,
-                                                                 msg->executed_shares,
-                                                                 msg->execution_price);
+        uint16_t locate = ntohs(msg->header.stock_locate);
+        auto it = lob_map.find(locate);
+        if (it == lob_map.end())
+            return;
+        it->second->ExecuteOrderWithPrice(msg->order_ref_number,
+                                          msg->executed_shares,
+                                          msg->execution_price);
     }
     void ParseOrderCancel(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const OrderCancelMsg *>(msg_buffer);
-
-        lob_map[msg->header.stock_locate]->CancelOrder(msg->order_ref_number,
-                                                       msg->cancelled_shares);
+        uint16_t locate = ntohs(msg->header.stock_locate);
+        auto it = lob_map.find(locate);
+        if (it == lob_map.end())
+            return;
+        it->second->CancelOrder(msg->order_ref_number,
+                                msg->cancelled_shares);
     }
     void ParseOrderDelete(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const OrderDeleteMsg *>(msg_buffer);
-
-        lob_map[msg->header.stock_locate]->DeleteOrder(msg->order_ref_number);
+        uint16_t locate = ntohs(msg->header.stock_locate);
+        auto it = lob_map.find(locate);
+        if (it == lob_map.end())
+            return;
+        it->second->DeleteOrder(msg->order_ref_number);
     }
     void ParseOrderReplace(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const OrderReplaceMsg *>(msg_buffer);
-
-        lob_map[msg->header.stock_locate]->ReplaceOrder(msg->og_order_ref_number,
-                                                        msg->new_order_ref_number,
-                                                        msg->shares,
-                                                        msg->price);
+        uint16_t locate = ntohs(msg->header.stock_locate);
+        auto it = lob_map.find(locate);
+        if (it == lob_map.end())
+            return;
+        it->second->ReplaceOrder(msg->og_order_ref_number,
+                                 msg->new_order_ref_number,
+                                 msg->shares,
+                                 msg->price);
     }
 
     void ParseMessage(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
