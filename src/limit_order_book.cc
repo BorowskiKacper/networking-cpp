@@ -99,8 +99,8 @@ namespace fh_lob
         level->total_volume -= order->shares;
         if (level->total_volume == 0)
         {
-            price_level_pool.deallocate(level);
-            price_map.erase(order->price);
+            // price_level_pool.deallocate(level);
+            // price_map.erase(order->price);
         }
 
         order_map.erase(id);
