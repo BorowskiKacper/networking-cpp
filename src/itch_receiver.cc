@@ -6,6 +6,7 @@
 // #include <cstdlib>
 #include <cstring>
 #include <unordered_map>
+#include <chrono>
 
 #include "../include/itch_message_parser.h"
 #include "../include/limit_order_book.h"
@@ -73,7 +74,10 @@ int main(int argc, char **argv)
     std::unordered_map<std::string, uint16_t> locate_map;
     std::unordered_map<uint16_t, fh_lob::LimitOrderBook *> lob_map;
 
-    size_t i = 0;
+    // Metrics variables
+    size_t moldudp_messages = 0;
+    size_t total_message_count = 0;
+    auto start_time = std::chrono::steady_clock::now();
 
     while (true)
     {
@@ -84,13 +88,25 @@ int main(int argc, char **argv)
         {
             perror("Receive failed");
         }
-        else
+
+        if (fh_lob::ParseMoldUDP64(buffer, locate_map, lob_map, total_message_count))
         {
-            // std::cout << i << std::endl;
-            fh_lob::ParseMoldUDP64(buffer, locate_map, lob_map);
+            break;
         }
-        i++;
+
+        moldudp_messages++;
     }
+
+    // Calculate Metrics
+    auto end_time = std::chrono::steady_clock::now();
+    auto time_taken = end_time - start_time;
+    std::cout << "=====TIME TAKEN=====\n"
+              << std::chrono::duration_cast<std::chrono::nanoseconds>(time_taken).count()
+              << "\n=====TOTAL MESSAGE COUNT=====\n"
+              << total_message_count
+              << "\n=====TOTAL MOLDUDP64 MESSAGES\n"
+              << moldudp_messages
+              << std::endl;
 
     close(udp_fd);
 

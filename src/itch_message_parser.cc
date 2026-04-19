@@ -10,7 +10,7 @@
 
 namespace fh_lob
 {
-    void SystemEventMessage(const char *msg_buffer)
+    bool SystemEventMessage(const char *msg_buffer)
     {
         std::string print;
         switch (msg_buffer[11])
@@ -31,10 +31,12 @@ namespace fh_lob
             print = "End of System Hours";
             break;
         case 'C':
-            print = "End of Messages";
+            return true;
+            // print = "End of Messages";
             break;
         }
         std::cout << print << std::endl;
+        return false;
     }
 
     void StockDirectoryMessage(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
@@ -114,12 +116,15 @@ namespace fh_lob
                                  msg->price);
     }
 
-    void ParseMessage(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
+    bool ParseMessage(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         switch (msg_buffer[0])
         {
         case 'S':
-            SystemEventMessage(msg_buffer);
+            if (SystemEventMessage(msg_buffer))
+            {
+                return true;
+            }
             break;
         case 'R':
             StockDirectoryMessage(msg_buffer, locate_map, lob_map);
@@ -150,9 +155,11 @@ namespace fh_lob
         }
             // Ignore non-LOB messages silently
         }
+
+        return false;
     }
 
-    void ParseMoldUDP64(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
+    bool ParseMoldUDP64(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map, size_t &total_message_count)
     {
         uint64_t sequence_number;
         uint16_t message_count;
@@ -166,7 +173,13 @@ namespace fh_lob
         {
             memcpy(&message_length, msg_buffer + i, sizeof(message_length));
             message_length = ntohs(message_length);
-            ParseMessage(msg_buffer + i + 2, locate_map, lob_map);
+            if (ParseMessage(msg_buffer + i + 2, locate_map, lob_map))
+            {
+                return true;
+            }
+            total_message_count++; // Metric
         }
+
+        return false;
     }
 }

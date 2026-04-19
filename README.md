@@ -5,7 +5,11 @@
 * Cache Misses (The Diagnostic Metric): Mimimize cache misses as much as possible to maximize throughput.
 
 ## My Scores:
-* Throughput: N/A
+* Throughput: 0.0017462198864493 msgs/ns
+    * time taken to send all messages: 141885060938 ns
+    * total message count sent: 268744780
+    * total message count received: 247762515
+    * total MoldUDP64 packets received: 5306532
 * Processing Time per Message: N/A
 * Maximum Latency: N/A
 * Cache Misses: N/A

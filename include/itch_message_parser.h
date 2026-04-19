@@ -112,6 +112,6 @@ namespace fh_lob
     void ParseOrderDelete(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
     void ParseOrderReplace(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
 
-    void ParseMessage(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
-    void ParseMoldUDP64(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
+    bool ParseMessage(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map);
+    bool ParseMoldUDP64(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map, size_t &total_message_count);
 }
