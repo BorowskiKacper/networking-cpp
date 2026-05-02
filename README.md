@@ -1,3 +1,4 @@
+# HFT Feed Handler and Limit Order Book (in progress)
 ## Most important Metrics:
 * Throughput: Total Messages Processed / Total Time Taken
 * Processsing Time per Message (The Offline Latency): Since I cannot measure network latency from my laptop, I'm measuring Internal processing latency.
