@@ -10,6 +10,7 @@
 
 #include "../include/itch_message_parser.h"
 #include "../include/limit_order_book.h"
+#include "../include/rdtsc.h"
 
 #define BUFFER_SIZE 1472
 
@@ -23,6 +24,9 @@ int main(int argc, char **argv)
 
     const char *multicast_ip = argv[1];
     int port = atoi(argv[2]);
+
+    std::cout << "test_start " << test_start << "\ntest_end " << test_end << "\ndiff " << test_end - test_start << std::endl;
+    return EXIT_SUCCESS;
 
     int udp_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (udp_fd < 0)
