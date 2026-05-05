@@ -3,96 +3,46 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <fstream>
-// #include <iostream>
+#include <cassert>
 
 namespace bench
 {
-    struct HDRHistogram
+    class HDRHistogram
     {
         static constexpr uint32_t TOP_BUCKETS = 64;
         static constexpr uint32_t SUB_BUCKETS = 32;
-        int *buckets = new int[TOP_BUCKETS * SUB_BUCKETS];
-        uint64_t count = 0, sum = 0, clipped = 0, max_seen = 0;
+        uint64_t buckets[TOP_BUCKETS * SUB_BUCKETS];
+        uint64_t samples = 0, total_cycles = 0, clipped = 0, max_cycles_seen = 0;
 
-        inline void Record(uint64_t cycles)
+        inline void Record(uint64_t cycles);
+
+        // Stores HDRHistogram in the specified file
+        // File structure:
+        //  First line specifies the number of top buckets and sub buckets
+        //  Lines 1 to TOP_BUCKET*SUB_BUCKETS (inclusive) record the number in each bucket
+        //  Last 4 lines (starting at line TOP_BUCKET*SUB_BUCKETS + 1) record samples, total_cycles, clipped, and max_cycles_seen respectively
+        void Save(std::string file_name);
+
+        // percentile p must be between 0 and 1.
+        // Returns the index of a bucket corresponding to the percentile if found, otherwise returns -1.
+        uint64_t PercentileBucket(double p) const;
+
+        // Prints samples, mean, p50, p90, p99, p99.9, max, clipped in ns.
+        friend std::ostream &operator<<(std::ostream &os, const HDRHistogram h)
         {
-            int zeros = __builtin_clzll(cycles);
-            int top_bucket = TOP_BUCKETS - 1 - zeros;
-            int sub_bucket = (cycles >> (top_bucket - 6)) & 0x3F; // & 0011 1111
-            buckets[TOP_BUCKETS * top_bucket + sub_bucket]++;
-        }
+            os << "Samples: " << h.samples
+               << "Mean: " << h.total_cycles / h.samples
+               << "p50: " << h.PercentileBucket(0.5)
+               << "p90: " << h.PercentileBucket(0.9)
+               << "p99: " << h.PercentileBucket(0.99)
+               << "p99.9: " << h.PercentileBucket(0.999)
+               << "max: " << h.max_cycles_seen
+               << "clipped: " << h.clipped;
 
-        void Save(std::string file_name)
-        {
-            std::ofstream outfile(file_name);
-            if (outfile.is_open())
-            {
-                outfile << TOP_BUCKETS << " " << SUB_BUCKETS << " \n";
-
-                for (size_t i = 0; i < TOP_BUCKETS * SUB_BUCKETS; i++)
-                {
-                    outfile << buckets[i] << '\n';
-                }
-
-                outfile << "count: " << count << '\n'
-                        << "sum: " << sum << '\n'
-                        << "clipped: " << clipped << '\n'
-                        << "max_seen: " << max_seen << '\n';
-            }
-            else
-            {
-                std::cerr << "Error saving HDR Histrogram to file";
-            }
-        }
-
-        uint64_t N()
-        {
-            uint64_t n = 0;
-            for (size_t i = 0; i < TOP_BUCKETS * SUB_BUCKETS; i++)
-            {
-                n += buckets[i];
-            }
-            return n;
-        }
-        uint64_t Percentile(uint64_t n, double p) // where 0 <= p <= 1.0
-        {
-            size_t num_percentiles = 4;
-            double percentiles[num_percentiles] = {0.9, 0.99, 0.999, 0.9999};
-            int percentile_i = 0;
-            int count = 0;
-
-            for (size_t i = 0; i < TOP_BUCKETS * SUB_BUCKETS; i++)
-            {
-                count += buckets[i];
-                if (count >= percentiles[percentile_i] * n)
-                {
-                    std::cout << "Percentile" << percentiles[percentile_i] << " count: " << count << std::endl;
-                }
-            }
+            return os;
         }
     };
 
-    inline uint64_t rdtsc_start()
-    {
-        uint32_t low, high;
-        asm volatile(
-            "lfence\n\t"
-            "rdtsc\n\t"
-            : "=a"(low), "=d"(high)
-            :
-            : "memory");
-        return ((uint64_t)high << 32) | low;
-    }
-
-    inline uint64_t rdtsc_end()
-    {
-        uint32_t low, high;
-        asm volatile(
-            "rdtscp\n\t"
-            "lfence"
-            : "=a"(low), "=d"(high)
-            :
-            : "memory", "rcx");
-        return ((uint64_t)high << 32) | low;
-    }
+    inline uint64_t rdtsc_start();
+    inline uint64_t rdtsc_end();
 }
