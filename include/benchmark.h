@@ -27,6 +27,8 @@ namespace bench
         // Returns the index of a bucket corresponding to the percentile if found, otherwise returns -1.
         uint64_t PercentileBucket(double p) const;
 
+        HDRHistogram &operator+=(const HDRHistogram other);
+
         // Prints samples, mean, p50, p90, p99, p99.9, max, clipped in ns.
         friend std::ostream &operator<<(std::ostream &os, const HDRHistogram h)
         {

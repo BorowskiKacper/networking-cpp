@@ -66,6 +66,22 @@ namespace bench
         return -1;
     }
 
+    HDRHistogram &HDRHistogram::operator+=(const HDRHistogram other)
+    {
+        samples += other.samples;
+        total_cycles += other.total_cycles;
+        if (other.max_cycles_seen > max_cycles_seen)
+            max_cycles_seen = other.max_cycles_seen;
+        clipped += other.clipped;
+
+        for (size_t i = 0; i < TOP_BUCKETS * SUB_BUCKETS; i++)
+        {
+            buckets[i] += other.buckets[i];
+        }
+
+        return *this;
+    }
+
     std::ostream &operator<<(std::ostream &os, const HDRHistogram h)
     {
         os << "Samples: " << h.samples
