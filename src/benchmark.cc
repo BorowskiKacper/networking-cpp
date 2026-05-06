@@ -3,6 +3,9 @@
 #include <fstream>
 #include <cassert>
 #include <iostream>
+#include <thread>
+#include <chrono>
+#include <algorithm>
 
 #include "../include/benchmark.h"
 
@@ -96,7 +99,7 @@ namespace bench
         return os;
     }
 
-    inline uint64_t rdtsc_start()
+    inline uint64_t RdtscStart()
     {
         uint32_t low, high;
         asm volatile(
@@ -108,7 +111,7 @@ namespace bench
         return ((uint64_t)high << 32) | low;
     }
 
-    inline uint64_t rdtsc_end()
+    inline uint64_t RdtscEnd()
     {
         uint32_t low, high;
         asm volatile(
@@ -118,6 +121,36 @@ namespace bench
             :
             : "memory", "rcx");
         return ((uint64_t)high << 32) | low;
+    }
+
+    uint64_t FindNsPerCycle(size_t ms)
+    {
+        double slopes[5];
+
+        for (size_t i = 0; i < 5; i++)
+        {
+            timespec ts_start;
+            timespec ts_end;
+
+            clock_gettime(CLOCK_MONOTONIC_RAW, &ts_start);
+            uint64_t start_cycles = RdtscStart();
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+
+            clock_gettime(CLOCK_MONOTONIC_RAW, &ts_end);
+            uint64_t end_cycles = RdtscEnd();
+
+            slopes[i] = static_cast<double>(ts_end.tv_nsec - ts_start.tv_nsec) / (end_cycles - start_cycles);
+        }
+
+        std::sort(slopes, slopes + 5);
+        std::cout << "Test slopes" << std::endl; // remove test
+        for (int i = 0; i < 5; i++)
+        {
+            std::cout << "\tSlope " << i << ": " << slopes[i] << std::endl;
+        } // remove till here
+
+        return slopes[2];
     }
 
 }

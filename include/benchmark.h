@@ -3,7 +3,6 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <fstream>
-#include <cassert>
 
 namespace bench
 {
@@ -45,6 +44,9 @@ namespace bench
         }
     };
 
-    inline uint64_t rdtsc_start();
-    inline uint64_t rdtsc_end();
+    inline uint64_t RdtscStart();
+    inline uint64_t RdtscEnd();
+
+    // Returns median of 5 tests separated by 'ms' each
+    uint64_t FindNsPerCycle(size_t ms);
 }
