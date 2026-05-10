@@ -19,7 +19,23 @@ namespace bench
         uint64_t PercentileBucket(double p) const;
 
     public:
-        inline void Record(uint64_t cycles);
+        inline void Record(uint64_t cycles)
+        {
+            samples++;
+            total_cycles += cycles;
+
+            int zeros = __builtin_clzll(cycles);
+            uint64_t top_bucket = TOP_BUCKETS - 1 - zeros;
+            uint64_t sub_bucket = (cycles >> (top_bucket - 6)) & 0x3F; // & 0011 1111
+            uint64_t bucket = TOP_BUCKETS * top_bucket + sub_bucket;
+            if (bucket < TOP_BUCKETS * SUB_BUCKETS)
+                buckets[bucket]++;
+            else
+                clipped++;
+
+            if (cycles > max_cycles_seen)
+                max_cycles_seen = cycles;
+        }
 
         // Stores HDRHistogram in the specified file
         // File structure:
@@ -46,8 +62,29 @@ namespace bench
         }
     };
 
-    inline uint64_t RdtscStart();
-    inline uint64_t RdtscEnd();
+    inline uint64_t RdtscStart()
+    {
+        uint32_t low, high;
+        asm volatile(
+            "lfence\n\t"
+            "rdtsc\n\t"
+            : "=a"(low), "=d"(high)
+            :
+            : "memory");
+        return ((uint64_t)high << 32) | low;
+    }
+
+    inline uint64_t RdtscEnd()
+    {
+        uint32_t low, high;
+        asm volatile(
+            "rdtscp\n\t"
+            "lfence"
+            : "=a"(low), "=d"(high)
+            :
+            : "memory", "rcx");
+        return ((uint64_t)high << 32) | low;
+    }
 
     // Returns median of 5 tests separated by 'ms' each
     uint64_t FindNsPerCycle(size_t ms);
