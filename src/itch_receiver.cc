@@ -85,7 +85,6 @@ int main(int argc, char **argv)
     size_t moldudp_messages = 0;
     size_t total_message_count = 0;
     auto start_time = std::chrono::steady_clock::now();
-    thread_local bench::HDRHistogram hist[256];
     bench::pin_to_cpu(cpu_id);
     double ns_per_cycle = bench::FindNsPerCycle(50);
 

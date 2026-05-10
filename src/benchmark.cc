@@ -123,4 +123,6 @@ namespace bench
             std::exit(EXIT_FAILURE);
         }
     }
+
+    thread_local bench::HDRHistogram hist[256];
 }

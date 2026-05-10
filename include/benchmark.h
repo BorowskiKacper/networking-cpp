@@ -47,19 +47,7 @@ namespace bench
         HDRHistogram &operator+=(const HDRHistogram other);
 
         // Prints samples, mean, p50, p90, p99, p99.9, max, clipped in ns.
-        friend std::ostream &operator<<(std::ostream &os, const HDRHistogram h)
-        {
-            os << "Samples: " << h.samples
-               << "Mean: " << h.total_cycles / h.samples
-               << "p50: " << h.PercentileBucket(0.5)
-               << "p90: " << h.PercentileBucket(0.9)
-               << "p99: " << h.PercentileBucket(0.99)
-               << "p99.9: " << h.PercentileBucket(0.999)
-               << "max: " << h.max_cycles_seen
-               << "clipped: " << h.clipped;
-
-            return os;
-        }
+        friend std::ostream &operator<<(std::ostream &os, const HDRHistogram h);
     };
 
     inline uint64_t RdtscStart()
