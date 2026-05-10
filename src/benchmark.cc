@@ -153,4 +153,16 @@ namespace bench
         return slopes[2];
     }
 
+    void pin_to_cpu(int cpu_id)
+    {
+        cpu_set_t set;
+        CPU_ZERO(&set);
+        CPU_SET(cpu_id, &set);
+
+        if (sched_setaffinity(0, sizeof(set), &set) != 0)
+        {
+            std::cerr << "sched_setaffinity failed " << std::strerror(errno) << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
+    }
 }

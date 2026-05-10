@@ -49,4 +49,7 @@ namespace bench
 
     // Returns median of 5 tests separated by 'ms' each
     uint64_t FindNsPerCycle(size_t ms);
+
+    // Pins the current thread to specific cpu
+    void pin_to_cpu(int cpu_id);
 }
