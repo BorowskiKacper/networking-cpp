@@ -12,6 +12,16 @@
     * total message count received: 247762515
     * total MoldUDP64 packets received: 5306532
 * Processing Time per Message: N/A
+    * Overall Histogram: 
+        * Samples: 182456541
+        * Mean: 758
+        * p50: 18446744073709551615 = -1
+        * p90: 18446744073709551615
+        * p99: 18446744073709551615
+        * p99.9: 18446744073709551615
+        * max: 20796992
+        * clipped: 0
+    * ns_per_cycle: 0
 * Maximum Latency: N/A
 * Cache Misses: N/A
 

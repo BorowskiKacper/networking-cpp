@@ -119,8 +119,8 @@ int main(int argc, char **argv)
     bench::HDRHistogram overall_hist;
     for (size_t i = 0; i < 256; i++)
     {
-        std::cout << "Histogram i=" << i << " \n"
-                  << bench::hist[i] << std::endl;
+        // std::cout << "Histogram i=" << i << " \n"
+        //           << bench::hist[i] << std::endl;
         overall_hist += bench::hist[i];
     }
     std::cout << "Overall Histogram: \n"

@@ -42,7 +42,7 @@ namespace bench
         for (size_t i = 0; i < TOP_BUCKETS * SUB_BUCKETS; i++)
         {
             count += buckets[i];
-            if (count >= p * count)
+            if (count >= p * total_cycles)
             {
                 return i;
             }
