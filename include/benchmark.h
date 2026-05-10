@@ -8,11 +8,17 @@ namespace bench
 {
     class HDRHistogram
     {
+    private:
         static constexpr uint32_t TOP_BUCKETS = 64;
         static constexpr uint32_t SUB_BUCKETS = 32;
         uint64_t buckets[TOP_BUCKETS * SUB_BUCKETS];
         uint64_t samples = 0, total_cycles = 0, clipped = 0, max_cycles_seen = 0;
 
+        // percentile p must be between 0 and 1.
+        // Returns the index of a bucket corresponding to the percentile if found, otherwise returns -1.
+        uint64_t PercentileBucket(double p) const;
+
+    public:
         inline void Record(uint64_t cycles);
 
         // Stores HDRHistogram in the specified file
@@ -21,10 +27,6 @@ namespace bench
         //  Lines 1 to TOP_BUCKET*SUB_BUCKETS (inclusive) record the number in each bucket
         //  Last 4 lines (starting at line TOP_BUCKET*SUB_BUCKETS + 1) record samples, total_cycles, clipped, and max_cycles_seen respectively
         void Save(std::string file_name);
-
-        // percentile p must be between 0 and 1.
-        // Returns the index of a bucket corresponding to the percentile if found, otherwise returns -1.
-        uint64_t PercentileBucket(double p) const;
 
         HDRHistogram &operator+=(const HDRHistogram other);
 
@@ -52,4 +54,6 @@ namespace bench
 
     // Pins the current thread to specific cpu
     void pin_to_cpu(int cpu_id);
+
+    extern thread_local HDRHistogram hist[256]; // indexed by ITCH Message Type
 }

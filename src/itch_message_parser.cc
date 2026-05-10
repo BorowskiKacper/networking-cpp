@@ -7,6 +7,7 @@
 
 #include "../include/itch_message_parser.h"
 #include "../include/limit_order_book.h"
+#include "../include/benchmark.h"
 
 namespace fh_lob
 {
@@ -173,11 +174,17 @@ namespace fh_lob
         {
             memcpy(&message_length, msg_buffer + i, sizeof(message_length));
             message_length = ntohs(message_length);
-            if (ParseMessage(msg_buffer + i + 2, locate_map, lob_map))
-            {
+
+            uint8_t msg_type = static_cast<uint8_t>(msg_buffer[i + 2]);
+            uint64_t start_cycle = bench::RdtscStart();
+            bool is_complete = ParseMessage(msg_buffer + i + 2, locate_map, lob_map);
+            uint64_t end_cycle = bench::RdtscEnd();
+            if (total_message_count > 10000) // warmup skip
+                bench::hist[msg_type].Record(end_cycle - start_cycle);
+            total_message_count++;
+
+            if (is_complete)
                 return true;
-            }
-            total_message_count++; // Metric
         }
 
         return false;

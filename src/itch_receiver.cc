@@ -16,14 +16,20 @@
 
 int main(int argc, char **argv)
 {
-    if (argc != 3)
+    // if (argc != 3)
+    // {
+    //     std::cerr << "Usage: " << argv[0] << " <multicast_ip> <port>\n"; // e.g., "239.0.0.1" 12345
+    //     return EXIT_FAILURE;
+    // }
+    if (argc != 4)
     {
-        std::cerr << "Usage: " << argv[0] << " <multicast_ip> <port>\n"; // e.g., "239.0.0.1" 12345
+        std::cerr << "Usage: " << argv[0] << " <multicast_ip> <port> <CPU pin\n"; // e.g., "239.0.0.1" 12345 3
         return EXIT_FAILURE;
     }
 
     const char *multicast_ip = argv[1];
     int port = atoi(argv[2]);
+    int cpu_id = atoi(argv[3]);
 
     int udp_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (udp_fd < 0)
@@ -79,6 +85,9 @@ int main(int argc, char **argv)
     size_t moldudp_messages = 0;
     size_t total_message_count = 0;
     auto start_time = std::chrono::steady_clock::now();
+    thread_local bench::HDRHistogram hist[256];
+    bench::pin_to_cpu(cpu_id);
+    double ns_per_cycle = bench::FindNsPerCycle(50);
 
     while (true)
     {
@@ -90,12 +99,11 @@ int main(int argc, char **argv)
             perror("Receive failed");
         }
 
-        if (fh_lob::ParseMoldUDP64(buffer, locate_map, lob_map, total_message_count))
-        {
-            break;
-        }
-
+        bool is_complete = fh_lob::ParseMoldUDP64(buffer, locate_map, lob_map, total_message_count);
         moldudp_messages++;
+
+        if (is_complete)
+            break;
     }
 
     // Calculate Metrics
@@ -108,6 +116,20 @@ int main(int argc, char **argv)
               << "\n=====TOTAL MOLDUDP64 MESSAGES\n"
               << moldudp_messages
               << std::endl;
+
+    bench::HDRHistogram overall_hist;
+    for (size_t i = 0; i < 256; i++)
+    {
+        std::cout << "Histogram i=" << i << " \n"
+                  << bench::hist[i] << std::endl;
+        overall_hist += bench::hist[i];
+    }
+    std::cout << "Overall Histogram: \n"
+              << overall_hist << std::endl;
+
+    std::cout << "ns_per_cycle: " << ns_per_cycle << std::endl;
+
+    overall_hist.Save("./histograms/overall_hist.txt");
 
     close(udp_fd);
 
