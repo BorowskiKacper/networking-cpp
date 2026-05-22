@@ -42,8 +42,8 @@ namespace bench
         // Stores HDRHistogram in the specified file
         // File structure:
         //  First line specifies the number of top buckets and sub buckets
-        //  Lines 1 to TOP_BUCKET*SUB_BUCKETS (inclusive) record the number in each bucket
-        //  Last 4 lines (starting at line TOP_BUCKET*SUB_BUCKETS + 1) record samples, total_cycles, clipped, and max_cycles_seen respectively
+        //  Lines 2 to TOP_BUCKET*SUB_BUCKETS + 1 (inclusive) record the number in each bucket
+        //  Last 4 lines (starting at line TOP_BUCKET*SUB_BUCKETS + 2) record samples, total_cycles, clipped, and max_cycles_seen respectively
         void Save(std::string file_name);
 
         HDRHistogram &operator+=(const HDRHistogram &other);
