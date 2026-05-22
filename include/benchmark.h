@@ -46,7 +46,7 @@ namespace bench
         //  Last 4 lines (starting at line TOP_BUCKET*SUB_BUCKETS + 1) record samples, total_cycles, clipped, and max_cycles_seen respectively
         void Save(std::string file_name);
 
-        HDRHistogram &operator+=(const HDRHistogram other);
+        HDRHistogram &operator+=(const HDRHistogram &other);
 
         // Prints samples, mean, p50, p90, p99, p99.9, max, clipped in ns.
         void PrintSummary(double ns_per_cycle);

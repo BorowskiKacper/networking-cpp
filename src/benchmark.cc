@@ -51,7 +51,7 @@ namespace bench
         return -1;
     }
 
-    HDRHistogram &HDRHistogram::operator+=(const HDRHistogram other)
+    HDRHistogram &HDRHistogram::operator+=(const HDRHistogram &other)
     {
         samples += other.samples;
         total_cycles += other.total_cycles;
