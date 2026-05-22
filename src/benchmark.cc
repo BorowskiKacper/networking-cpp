@@ -87,15 +87,6 @@ namespace bench
     {
         std::cout << "Samples: " << samples << std::endl
                   << "Mean: " << total_cycles / samples << std::endl
-                  << "p50: " << PercentileBucket(0.5) << std::endl
-                  << "p90: " << PercentileBucket(0.9) << std::endl
-                  << "p99: " << PercentileBucket(0.99) << std::endl
-                  << "p99.9: " << PercentileBucket(0.999) << std::endl
-                  << "max: " << max_cycles_seen << std::endl
-                  << "clipped: " << clipped << std::endl;
-
-        std::cout << "Samples: " << samples << std::endl
-                  << "Mean: " << total_cycles / samples << std::endl
                   << "p50: " << BucketToCycles(PercentileBucket(0.5)) * ns_per_cycle << std::endl
                   << "p90: " << BucketToCycles(PercentileBucket(0.9)) * ns_per_cycle << std::endl
                   << "p99: " << BucketToCycles(PercentileBucket(0.99)) * ns_per_cycle << std::endl
