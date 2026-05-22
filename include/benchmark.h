@@ -11,7 +11,7 @@ namespace bench
     private:
         static constexpr uint32_t TOP_BUCKETS = 32;
         static constexpr uint32_t SUB_BUCKETS = 64;
-        uint64_t buckets[TOP_BUCKETS * SUB_BUCKETS];
+        uint64_t buckets[TOP_BUCKETS * SUB_BUCKETS]{};
         uint64_t samples = 0, total_cycles = 0, clipped = 0, max_cycles_seen = 0;
 
         // percentile p must be between 0 and 1.
