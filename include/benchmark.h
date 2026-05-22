@@ -49,7 +49,10 @@ namespace bench
         HDRHistogram &operator+=(const HDRHistogram other);
 
         // Prints samples, mean, p50, p90, p99, p99.9, max, clipped in ns.
-        friend std::ostream &operator<<(std::ostream &os, const HDRHistogram h);
+        void PrintSummary(double ns_per_cycle);
+
+        // Returns mid-bucket cycle value given the bucket
+        uint64_t BucketToCycles(uint64_t bucket) const;
     };
 
     inline uint64_t RdtscStart()
@@ -77,7 +80,7 @@ namespace bench
     }
 
     // Returns median of 5 tests separated by 'ms' each
-    uint64_t FindNsPerCycle(size_t ms);
+    double FindNsPerCycle(size_t ms);
 
     // Pins the current thread to specific cpu
     void pin_to_cpu(int cpu_id);

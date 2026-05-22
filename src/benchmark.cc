@@ -36,7 +36,7 @@ namespace bench
 
     uint64_t HDRHistogram::PercentileBucket(double p) const
     {
-        int count = 0;
+        uint64_t count = 0;
         assert(0 <= p && p <= 1);
 
         for (size_t i = 0; i < TOP_BUCKETS * SUB_BUCKETS; i++)
@@ -67,21 +67,44 @@ namespace bench
         return *this;
     }
 
-    std::ostream &operator<<(std::ostream &os, const HDRHistogram h)
+    uint64_t HDRHistogram::BucketToCycles(uint64_t bucket) const
     {
-        os << "Samples: " << h.samples
-           << "Mean: " << h.total_cycles / h.samples
-           << "p50: " << h.PercentileBucket(0.5)
-           << "p90: " << h.PercentileBucket(0.9)
-           << "p99: " << h.PercentileBucket(0.99)
-           << "p99.9: " << h.PercentileBucket(0.999)
-           << "max: " << h.max_cycles_seen
-           << "clipped: " << h.clipped;
+        uint64_t sub_bucket = bucket & 0x3F;
+        uint64_t top_bucket = bucket >> 6;
+        if (top_bucket == 0)
+            return sub_bucket;
 
-        return os;
+        uint32_t bit_position = top_bucket + 5;
+
+        uint64_t significant_digit = 1ULL << bit_position;
+        uint64_t precision_digits = sub_bucket << (bit_position - 6);
+        uint64_t mid_bucket = top_bucket <= 1 ? 0 : 1ULL << (bit_position - 7);
+
+        return significant_digit | precision_digits | mid_bucket;
     }
 
-    uint64_t FindNsPerCycle(size_t ms)
+    void HDRHistogram::PrintSummary(double ns_per_cycle)
+    {
+        std::cout << "Samples: " << samples << std::endl
+                  << "Mean: " << total_cycles / samples << std::endl
+                  << "p50: " << PercentileBucket(0.5) << std::endl
+                  << "p90: " << PercentileBucket(0.9) << std::endl
+                  << "p99: " << PercentileBucket(0.99) << std::endl
+                  << "p99.9: " << PercentileBucket(0.999) << std::endl
+                  << "max: " << max_cycles_seen << std::endl
+                  << "clipped: " << clipped << std::endl;
+
+        std::cout << "Samples: " << samples << std::endl
+                  << "Mean: " << total_cycles / samples << std::endl
+                  << "p50: " << BucketToCycles(PercentileBucket(0.5)) * ns_per_cycle << std::endl
+                  << "p90: " << BucketToCycles(PercentileBucket(0.9)) * ns_per_cycle << std::endl
+                  << "p99: " << BucketToCycles(PercentileBucket(0.99)) * ns_per_cycle << std::endl
+                  << "p99.9: " << BucketToCycles(PercentileBucket(0.999)) * ns_per_cycle << std::endl
+                  << "max: " << max_cycles_seen << std::endl
+                  << "clipped: " << clipped << std::endl;
+    }
+
+    double FindNsPerCycle(size_t ms)
     {
         double slopes[5];
 
