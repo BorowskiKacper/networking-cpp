@@ -9,8 +9,8 @@ namespace bench
     class HDRHistogram
     {
     private:
-        static constexpr uint32_t TOP_BUCKETS = 64;
-        static constexpr uint32_t SUB_BUCKETS = 32;
+        static constexpr uint32_t TOP_BUCKETS = 32;
+        static constexpr uint32_t SUB_BUCKETS = 64;
         uint64_t buckets[TOP_BUCKETS * SUB_BUCKETS];
         uint64_t samples = 0, total_cycles = 0, clipped = 0, max_cycles_seen = 0;
 
@@ -24,10 +24,12 @@ namespace bench
             samples++;
             total_cycles += cycles;
 
-            int zeros = __builtin_clzll(cycles);
-            uint64_t top_bucket = TOP_BUCKETS - 1 - zeros;
-            uint64_t sub_bucket = (cycles >> (top_bucket - 6)) & 0x3F; // & 0011 1111
-            uint64_t bucket = TOP_BUCKETS * top_bucket + sub_bucket;
+            uint32_t bit_position = 63 - __builtin_clzll(cycles | 1); // treat cycles=0 as 1 to avoid undefined behavior.
+            uint32_t shift = bit_position < 6 ? 0 : bit_position - 6;
+            uint64_t sub_bucket = (cycles >> shift) & 0x3F;
+            uint64_t top_bucket = bit_position < 6 ? 0 : bit_position - 5;
+            uint64_t bucket = (top_bucket << 6) | sub_bucket;
+
             if (bucket < TOP_BUCKETS * SUB_BUCKETS)
                 buckets[bucket]++;
             else
