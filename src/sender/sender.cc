@@ -13,7 +13,7 @@ void print_buffer(char *msg_buffer, size_t msg_length)
 {
     if (msg_length > 0)
         std::cout << msg_buffer[0] << " ";
-    for (int i = 1; i < msg_length; i++)
+    for (size_t i = 1; i < msg_length; i++)
     {
         std::cout << std::hex << std::setw(2) << std::setfill('0')
                   << (static_cast<unsigned int>(static_cast<unsigned char>(msg_buffer[i]))) << " ";
@@ -80,14 +80,15 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    struct sockaddr_in multicast_addr = {.sin_family = AF_INET, .sin_port = htons(port)};
+    struct sockaddr_in multicast_addr{};
+    multicast_addr.sin_family = AF_INET;
+    multicast_addr.sin_port = htons(port);
+
     if (inet_pton(AF_INET, multicast_ip, &(multicast_addr.sin_addr.s_addr)) <= 0)
     {
         perror("Something went wrong with the IP address");
         return EXIT_FAILURE;
     }
-
-    uint64_t i = 0;
 
     size_t MAX_MOLDUDP64_SIZE = 1472;
     char *moldudp64_buffer = new char[MAX_MOLDUDP64_SIZE]{};
