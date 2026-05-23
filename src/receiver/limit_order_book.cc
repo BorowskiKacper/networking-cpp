@@ -71,6 +71,7 @@ namespace fh_lob
     void LimitOrderBook::ExecuteOrderWithPrice(uint64_t id, uint32_t shares, uint32_t price)
     {
         ReduceOrderSize(id, shares);
+        price = price; // handle warning
     }
 
     void LimitOrderBook::CancelOrder(uint64_t id, uint32_t shares)
@@ -114,7 +115,7 @@ namespace fh_lob
             return; // Order not found
 
         Order *order = it->second;
-        PriceLevel *level = price_map[order->price];
+        // PriceLevel *level = price_map[order->price];
 
         // REVISIT: is this implementation correct? should I ignore how many shares there were previously or not?
         char side = order->side;
