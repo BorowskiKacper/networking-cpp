@@ -3,7 +3,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "./limit_order_book.h"
+#include "limit_order_book.h"
 
 namespace fh_lob
 {

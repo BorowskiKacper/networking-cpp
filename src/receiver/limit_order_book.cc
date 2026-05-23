@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <iostream>
 
-#include "../../include/receiver/limit_order_book.h"
+#include "receiver/limit_order_book.h"
 
 namespace fh_lob
 {

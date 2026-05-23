@@ -5,9 +5,9 @@
 #include <cassert>
 #include <unordered_map>
 
-#include "../../include/receiver/message_parser.h"
-#include "../../include/receiver/limit_order_book.h"
-#include "../../include/receiver/benchmark.h"
+#include "receiver/message_parser.h"
+#include "receiver/limit_order_book.h"
+#include "receiver/benchmark.h"
 
 namespace fh_lob
 {

@@ -8,9 +8,9 @@
 #include <unordered_map>
 #include <chrono>
 
-#include "../../include/receiver/message_parser.h"
-#include "../../include/receiver/limit_order_book.h"
-#include "../../include/receiver/benchmark.h"
+#include "receiver/message_parser.h"
+#include "receiver/limit_order_book.h"
+#include "receiver/benchmark.h"
 
 #define BUFFER_SIZE 1472
 
