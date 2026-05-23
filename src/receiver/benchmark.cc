@@ -7,7 +7,7 @@
 #include <chrono>
 #include <algorithm>
 
-#include "../include/benchmark.h"
+#include "../../include/receiver/benchmark.h"
 
 namespace bench
 {

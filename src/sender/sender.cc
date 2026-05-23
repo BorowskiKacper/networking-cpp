@@ -141,10 +141,10 @@ int main(int argc, char *argv[])
         }
         if (moldudp64_buffer[moldudp64_index] == 'S') // && moldudp64_buffer[moldudp64_index + 11] == 'S')
         {
-            std::cout << "Pausing for 5 seconds..." << std::endl;
+            std::cout << "Pausing for 1 second..." << std::endl;
 
             // Standard way to pause the current thread
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+            std::this_thread::sleep_for(std::chrono::seconds(1));
 
             std::cout << "Resumed!" << std::endl;
         }

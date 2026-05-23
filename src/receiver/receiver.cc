@@ -8,9 +8,9 @@
 #include <unordered_map>
 #include <chrono>
 
-#include "../include/itch_message_parser.h"
-#include "../include/limit_order_book.h"
-#include "../include/benchmark.h"
+#include "../../include/receiver/message_parser.h"
+#include "../../include/receiver/limit_order_book.h"
+#include "../../include/receiver/benchmark.h"
 
 #define BUFFER_SIZE 1472
 
@@ -108,6 +108,9 @@ int main(int argc, char **argv)
     // Calculate Metrics
     auto end_time = std::chrono::steady_clock::now();
     auto time_taken = end_time - start_time;
+
+    double second_ns_per_cycle = bench::FindNsPerCycle(50);
+
     std::cout << "=====TIME TAKEN=====\n"
               << std::chrono::duration_cast<std::chrono::nanoseconds>(time_taken).count()
               << "\n=====TOTAL MESSAGE COUNT=====\n"
@@ -123,10 +126,11 @@ int main(int argc, char **argv)
         //           << bench::hist[i] << std::endl;
         overall_hist += bench::hist[i];
     }
-    std::cout << "Overall Histogram: \n"
-              << overall_hist << std::endl;
+    std::cout << "Overall Histogram: \n";
+    overall_hist.PrintSummary(ns_per_cycle);
 
     std::cout << "ns_per_cycle: " << ns_per_cycle << std::endl;
+    std::cout << "Again find ns_per_cycle: " << second_ns_per_cycle << std::endl;
 
     overall_hist.Save("./histograms/overall_hist.txt");
 
