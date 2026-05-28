@@ -20,7 +20,16 @@ SENDER_SRC       :=                       \
 SENDER_OBJECTS   := $(SENDER_SRC:%.cc=$(OBJ_DIR)/%.o)
 SENDER_DEPS      := $(SENDER_OBJECTS:.o=.d)
 
-all: receiver sender
+OFFLINE_LOB_TARGET 	:= offline
+OFFLINE_LOB_SRC		:= 					  \
+	$(wildcard src/offline/*.cc)		  \
+	src/receiver/benchmark.cc			  \
+	src/receiver/limit_order_book.cc	  \
+	src/receiver/message_parser.cc
+OFFLINE_LOB_OBJECTS := $(OFFLINE_LOB_SRC:%.cc=$(OBJ_DIR)/%.o)
+OFFLINE_LOB_DEPS    := $(OFFLINE_LOB_OBJECTS:.o=.d)
+
+all: receiver sender offline
 
 $(OBJ_DIR)/%.o: %.cc
 	@mkdir -p $(@D)
@@ -28,6 +37,7 @@ $(OBJ_DIR)/%.o: %.cc
 
 receiver: $(APP_DIR)/$(RECEIVER_TARGET)
 sender:   $(APP_DIR)/$(SENDER_TARGET)
+offline:  $(APP_DIR)/$(OFFLINE_LOB_TARGET)
 
 $(APP_DIR)/$(RECEIVER_TARGET): $(RECEIVER_OBJECTS)
 	@mkdir -p $(@D)
@@ -37,8 +47,13 @@ $(APP_DIR)/$(SENDER_TARGET): $(SENDER_OBJECTS)
 	@mkdir -p $(@D)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
+$(APP_DIR)/$(OFFLINE_LOB_TARGET): $(OFFLINE_LOB_OBJECTS)
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
 -include $(RECEIVER_DEPS)
 -include $(SENDER_DEPS)
+-include $(OFFLINE_LOB_DEPS)
 
 # Receiver commands
 receiver-debug:   CXXFLAGS += -DDEBUG -g -O0
@@ -76,10 +91,29 @@ sender-clean:
 	-@rm -f $(SENDER_OBJECTS) $(SENDER_DEPS)
 	-@rm -f $(APP_DIR)/$(SENDER_TARGET)
 
+# Offline commands
+offline-debug:     CXXFLAGS += -DDEBUG -g -O0
+offline-debug:     offline
+
+offline-release:   CXXFLAGS += -O3 -march=native -mtune=native -flto -DNDEBUG
+offline-release:   LDFLAGS  += -flto
+offline-release:   offline
+
+offline-info:
+	@echo "[offline] Target:       $(APP_DIR)/$(OFFLINE_LOB_TARGET)"
+	@echo "[offline] Sources:      $(OFFLINE_LOB_SRC)"
+	@echo "[offline] Objects:      $(OFFLINE_LOB_OBJECTS)"
+	@echo "[offline] Dependencies: $(OFFLINE_LOB_DEPS)"
+
+offline-clean:
+	-@rm -f $(OFFLINE_LOB_OBJECTS) $(OFFLINE_LOB_DEPS)
+	-@rm -f $(APP_DIR)/$(OFFLINE_LOB_TARGET)
+
 # Global
 clean:
 	-@rm -rvf $(OBJ_DIR)/* $(APP_DIR)/*
 
 .PHONY: all clean                                                       \
         receiver receiver-debug receiver-release receiver-info receiver-clean \
-        sender   sender-debug   sender-release   sender-info   sender-clean
+        sender   sender-debug   sender-release   sender-info   sender-clean	  \
+		offline  offline-debug  offline-release  offline-info  offline-clean
