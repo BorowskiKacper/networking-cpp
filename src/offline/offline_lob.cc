@@ -75,18 +75,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 
     double second_ns_per_cycle = bench::FindNsPerCycle(50);
 
-    std::cout << "=====TIME TAKEN=====\n"
-              << std::chrono::duration_cast<std::chrono::nanoseconds>(time_taken).count()
-              << "\n=====TOTAL MESSAGE COUNT=====\n"
-              << total_message_count
-              << std::endl;
+    std::chrono::duration<double> elapsed = time_taken;
+    std::cout << "* Throughput (msgs/sec): " << total_message_count / elapsed.count() << std::endl
+              << "    * Total Time (ns): " << std::chrono::duration_cast<std::chrono::nanoseconds>(time_taken).count() << std::endl
+              << "    * Total Messages (msgs): " << total_message_count << std::endl;
 
     bench::HDRHistogram overall_hist;
     for (size_t i = 0; i < 256; i++)
     {
         overall_hist += bench::hist[i];
     }
-    std::cout << "Overall Histogram: \n";
     overall_hist.PrintSummary(ns_per_cycle);
 
     std::cout << "ns_per_cycle: " << ns_per_cycle << std::endl;

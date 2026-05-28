@@ -1,27 +1,25 @@
 # HFT Feed Handler and Limit Order Book (in progress)
-## Most important Metrics:
+## Most important offline Metrics:
 * Throughput: Total Messages Processed / Total Time Taken
 * Processsing Time per Message (The Offline Latency): Since I cannot measure network latency from my laptop, I'm measuring Internal processing latency.
 * Maximum Latency (The Jitter Test): 99th and 99.9th percentile processing times.
 * Cache Misses (The Diagnostic Metric): Mimimize cache misses as much as possible to maximize throughput.
 
-## My Scores:
-* Throughput: 0.0017462198864493 msgs/ns
-    * time taken to send all messages: 141885060938 ns
-    * total message count sent: 268744780
-    * total message count received: 247762515
-    * total MoldUDP64 packets received: 5306532
-* Processing Time per Message: N/A
-    * Overall Histogram: 
-        * Samples: 268734779
-        * Mean: 437
-        * p50: 88.0984
-        * p90: 589.539
-        * p99: 1994.68
-        * p99.9: 8546.09
-        * max: 26111646
-    * ns_per_cycle: 0.554078
-* Maximum Latency: N/A
+## Current Scores:
+* Throughput (msgs/sec): 3.37535e+06
+    * Total Time (ns): 79619808164
+    * Total Messages (msgs): 268744780
+* Processing Time per Message (ns/msg): 420.207
+* Maximum Latency: 
+    * Overall Histogram (ns/msg): 
+        * p50: 85.882
+        * p90: 560.726
+        * p99: 1906.03
+        * p99.9: 7482.26
+        * max: 2.01757e+07
+    * total (msgs): 268734779
+    * clipped (msgs): 0
+    * ns_per_cycle (ns/cycle): 0.554077
 * Cache Misses: N/A
 
 ## Naming Convention used
