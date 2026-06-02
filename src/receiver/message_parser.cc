@@ -3,7 +3,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <cassert>
-#include <unordered_map>
+#include "absl/container/flat_hash_map.h"
 
 #include "receiver/message_parser.h"
 #include "receiver/limit_order_book.h"
@@ -40,7 +40,7 @@ namespace fh_lob
         return false;
     }
 
-    void StockDirectoryMessage(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
+    void StockDirectoryMessage(const char *msg_buffer, absl::flat_hash_map<std::string, uint16_t> &locate_map, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const StockDirectoryMsg *>(msg_buffer);
 
@@ -51,7 +51,7 @@ namespace fh_lob
             lob_map[msg->header.stock_locate] = new LimitOrderBook(10000);
     }
 
-    void ParseAddOrder(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
+    void ParseAddOrder(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const AddOrderMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
@@ -64,7 +64,7 @@ namespace fh_lob
                              msg->price);
     }
 
-    void ParseOrderExecuted(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
+    void ParseOrderExecuted(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const OrderExecutedMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
@@ -74,7 +74,7 @@ namespace fh_lob
         it->second->ExecuteOrder(msg->order_ref_number,
                                  msg->executed_shares);
     }
-    void ParseOrderExecutedPrice(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
+    void ParseOrderExecutedPrice(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const OrderExecutedPriceMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
@@ -85,7 +85,7 @@ namespace fh_lob
                                           msg->executed_shares,
                                           msg->execution_price);
     }
-    void ParseOrderCancel(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
+    void ParseOrderCancel(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const OrderCancelMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
@@ -95,7 +95,7 @@ namespace fh_lob
         it->second->CancelOrder(msg->order_ref_number,
                                 msg->cancelled_shares);
     }
-    void ParseOrderDelete(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
+    void ParseOrderDelete(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const OrderDeleteMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
@@ -104,7 +104,7 @@ namespace fh_lob
             return;
         it->second->DeleteOrder(msg->order_ref_number);
     }
-    void ParseOrderReplace(const char *msg_buffer, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
+    void ParseOrderReplace(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         const auto *msg = reinterpret_cast<const OrderReplaceMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
@@ -117,7 +117,7 @@ namespace fh_lob
                                  msg->price);
     }
 
-    bool ParseMessage(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map)
+    bool ParseMessage(const char *msg_buffer, absl::flat_hash_map<std::string, uint16_t> &locate_map, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map)
     {
         switch (msg_buffer[0])
         {
@@ -160,7 +160,7 @@ namespace fh_lob
         return false;
     }
 
-    bool ParseMoldUDP64(const char *msg_buffer, std::unordered_map<std::string, uint16_t> &locate_map, std::unordered_map<uint16_t, LimitOrderBook *> &lob_map, size_t &total_message_count)
+    bool ParseMoldUDP64(const char *msg_buffer, absl::flat_hash_map<std::string, uint16_t> &locate_map, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map, size_t &total_message_count)
     {
         uint64_t sequence_number;
         uint16_t message_count;

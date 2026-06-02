@@ -5,7 +5,7 @@
 #include <iostream>
 // #include <cstdlib>
 #include <cstring>
-#include <unordered_map>
+#include "absl/container/flat_hash_map.h"
 #include <chrono>
 
 #include "receiver/message_parser.h"
@@ -78,8 +78,8 @@ int main(int argc, char **argv)
     struct sockaddr_in sender_addr;
     socklen_t sender_len = sizeof(sender_addr);
 
-    std::unordered_map<std::string, uint16_t> locate_map;
-    std::unordered_map<uint16_t, fh_lob::LimitOrderBook *> lob_map;
+    absl::flat_hash_map<std::string, uint16_t> locate_map;
+    absl::flat_hash_map<uint16_t, fh_lob::LimitOrderBook *> lob_map;
 
     // Metrics variables
     size_t moldudp_messages = 0;

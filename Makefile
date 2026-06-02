@@ -1,6 +1,6 @@
 CXX      := g++
-CXXFLAGS := -std=c++20 -pedantic-errors -Wall -Wextra -Werror
-LDFLAGS  := -L/usr/lib -lstdc++ -lm
+CXXFLAGS := -std=c++20 -pedantic-errors -Wall -Wextra -Werror $(shell pkg-config --cflags absl_flat_hash_map)
+LDFLAGS  := -L/usr/lib -lstdc++ -lm $(shell pkg-config --libs absl_flat_hash_map)
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps
@@ -95,7 +95,7 @@ sender-clean:
 offline-debug:     CXXFLAGS += -DDEBUG -g -O0
 offline-debug:     offline
 
-offline-release:   CXXFLAGS += -O3 -march=native -mtune=native -flto -DNDEBUG
+offline-release:   CXXFLAGS += -O2 -march=native -mtune=native -flto -DNDEBUG
 offline-release:   LDFLAGS  += -flto
 offline-release:   offline
 

@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <unordered_map>
+#include "absl/container/flat_hash_map.h"
 
 namespace fh_lob
 {
@@ -85,8 +85,8 @@ namespace fh_lob
         MemoryPool<Order> order_pool;
         MemoryPool<PriceLevel> price_level_pool;
 
-        std::unordered_map<uint64_t, Order *> order_map;
-        std::unordered_map<uint32_t, PriceLevel *> price_map;
+        absl::flat_hash_map<uint64_t, Order *> order_map;
+        absl::flat_hash_map<uint32_t, PriceLevel *> price_map;
 
         void ReduceOrderSize(uint64_t id, uint32_t shares);
 

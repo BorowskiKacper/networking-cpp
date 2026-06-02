@@ -39,8 +39,8 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 
     uint16_t msg_length;
 
-    std::unordered_map<std::string, uint16_t> locate_map;
-    std::unordered_map<uint16_t, fh_lob::LimitOrderBook *> lob_map;
+    absl::flat_hash_map<std::string, uint16_t> locate_map;
+    absl::flat_hash_map<uint16_t, fh_lob::LimitOrderBook *> lob_map;
 
     // Metrics variables
     size_t total_message_count = 0;
