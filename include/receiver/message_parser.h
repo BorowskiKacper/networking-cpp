@@ -104,15 +104,15 @@ namespace fh_lob
 
 #pragma pack(pop) // Restore default alignment
 
-    void ParseAddOrder(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map);
-    void ParseAddMPIDOrder(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map);
-    void ParseOrderExecuted(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map);
-    void ParseOrderExecutedPrice(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map);
-    void ParseOrderCancel(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map);
-    void ParseOrderDelete(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map);
-    void ParseOrderReplace(const char *msg_buffer, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map);
+    void ParseAddOrder(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
+    void ParseAddMPIDOrder(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
+    void ParseOrderExecuted(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
+    void ParseOrderExecutedPrice(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
+    void ParseOrderCancel(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
+    void ParseOrderDelete(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
+    void ParseOrderReplace(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
 
     // return true if last message has been detected, false otherwise
-    bool ParseMessage(const char *msg_buffer, absl::flat_hash_map<std::string, uint16_t> &locate_map, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map);
-    bool ParseMoldUDP64(const char *msg_buffer, absl::flat_hash_map<std::string, uint16_t> &locate_map, absl::flat_hash_map<uint16_t, LimitOrderBook *> &lob_map, size_t &total_message_count);
+    bool ParseMessage(const char *msg_buffer, absl::flat_hash_map<std::string, uint16_t> &locate_map, std::vector<LimitOrderBook *> &lob_ptrs);
+    bool ParseMoldUDP64(const char *msg_buffer, absl::flat_hash_map<std::string, uint16_t> &locate_map, std::vector<LimitOrderBook *> &lob_ptrs, size_t &total_message_count);
 }
