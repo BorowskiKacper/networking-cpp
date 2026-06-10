@@ -8,22 +8,20 @@ namespace fh_lob
 {
     struct Order
     {
+        Order *next = nullptr;
+        Order *prev = nullptr;
         uint64_t id;
         char side;
         uint32_t shares;
         uint32_t price;
-
-        Order *next = nullptr;
-        Order *prev = nullptr;
     };
 
     struct PriceLevel
     {
-        uint32_t price;
-        uint32_t total_volume;
-
         Order *head = nullptr;
         Order *tail = nullptr;
+        uint32_t price;
+        uint32_t total_volume;
     };
 
     template <typename T>
@@ -85,13 +83,16 @@ namespace fh_lob
         MemoryPool<Order> order_pool;
         MemoryPool<PriceLevel> price_level_pool;
 
-        absl::flat_hash_map<uint64_t, Order *> order_map;
-        absl::flat_hash_map<uint32_t, PriceLevel *> price_map;
+        absl::flat_hash_map<uint64_t, Order *> order_map;                          // stock locate --> order
+        std::vector<absl::flat_hash_map<uint32_t, PriceLevel *>> price_level_maps; // stock locate --> price level map --> price level
+
+        absl::flat_hash_map<std::array<char, 8>, Order *> str_to_locate;
+        std::vector<std::array<char, 8>> locate_to_str;
 
         void ReduceOrderSize(uint64_t id, uint32_t shares);
 
     public:
-        LimitOrderBook(size_t max_orders) : order_pool(max_orders), price_level_pool(max_orders) {}
+        LimitOrderBook(size_t orders, size_t price_levels) : order_pool(orders), price_level_pool(price_levels) {}
 
         void AddOrder(uint64_t id, char side, uint32_t shares, uint32_t price);
         void ExecuteOrder(uint64_t id, uint32_t shares);
@@ -99,5 +100,8 @@ namespace fh_lob
         void CancelOrder(uint64_t id, uint32_t shares);
         void DeleteOrder(uint64_t id);
         void ReplaceOrder(uint64_t old_id, uint64_t new_id, uint32_t shares, uint32_t new_price);
+
+        void MapStrToLocate(std::array<char, 8> &str, uint16_t locate);
+        void MapLocateToStr(std::array<char, 8> &str, uint16_t locate);
     };
 }
