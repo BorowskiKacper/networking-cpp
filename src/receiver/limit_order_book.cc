@@ -134,4 +134,18 @@ namespace fh_lob
         // }
     }
 
+    void LimitOrderBook::MapStockStr(uint64_t stock, uint16_t locate)
+    {
+        size_t size = locate_to_str.size();
+        while (locate >= size)
+        {
+            std::cout << "LimitOrderBook::MapStockStr WARNING: size (" << size << ") of locate_to_str is smaller than locate (" << locate << "). Resizing locate_to_str and price_level_maps to double capacity. This indicates that the number of locates exceeds the expected number of locates." << std::endl;
+            size *= 2;
+            locate_to_str.resize(size);
+            price_level_maps.resize(size);
+        }
+        str_to_locate.try_emplace(stock, locate);
+        locate_to_str[locate] = stock;
+    }
+
 }

@@ -40,21 +40,11 @@ namespace fh_lob
         return false;
     }
 
-    void StockDirectoryMessage(const char *msg_buffer, absl::flat_hash_map<std::string, uint16_t> &locate_map, std::vector<LimitOrderBook *> &lob_ptrs)
+    void StockDirectoryMessage(const char *msg_buffer, LimitOrderBook &lob)
     {
         const auto *msg = reinterpret_cast<const StockDirectoryMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
-
-        std::string stock_str(msg->stock, sizeof(char) * 8);
-        if (locate_map.find(stock_str) == locate_map.end())
-            locate_map[stock_str] = locate;
-        if (lob_ptrs.size() <= locate)
-        {
-            std::cerr << "WARNING: Stock locate exceeded lob_ptrs array size. Resizing to double capacity." << std::endl;
-            lob_ptrs.resize(lob_ptrs.size() * 2, nullptr);
-        }
-        if (lob_ptrs[locate] == nullptr)
-            lob_ptrs[locate] = new LimitOrderBook(10000);
+        lob.MapStockStr(reinterpret_cast<uint64_t>(msg->stock, sizeof(char) * 8), locate);
     }
 
     void ParseAddOrder(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs)

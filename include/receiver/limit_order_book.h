@@ -86,13 +86,18 @@ namespace fh_lob
         absl::flat_hash_map<uint64_t, Order *> order_map;                          // stock locate --> order
         std::vector<absl::flat_hash_map<uint32_t, PriceLevel *>> price_level_maps; // stock locate --> price level map --> price level
 
-        absl::flat_hash_map<std::array<char, 8>, Order *> str_to_locate;
-        std::vector<std::array<char, 8>> locate_to_str;
+        absl::flat_hash_map<uint64_t, uint16_t> str_to_locate;
+        std::vector<uint64_t> locate_to_str;
 
         void ReduceOrderSize(uint64_t id, uint32_t shares);
 
     public:
-        LimitOrderBook(size_t orders, size_t price_levels) : order_pool(orders), price_level_pool(price_levels) {}
+        LimitOrderBook(size_t orders, size_t price_levels, size_t locates) : order_pool(orders), price_level_pool(price_levels)
+        {
+            price_level_maps.resize(locates);
+            locate_to_str.resize(locates);
+            str_to_locate.reserve(locates);
+        }
 
         void AddOrder(uint64_t id, char side, uint32_t shares, uint32_t price);
         void ExecuteOrder(uint64_t id, uint32_t shares);
@@ -101,7 +106,6 @@ namespace fh_lob
         void DeleteOrder(uint64_t id);
         void ReplaceOrder(uint64_t old_id, uint64_t new_id, uint32_t shares, uint32_t new_price);
 
-        void MapStrToLocate(std::array<char, 8> &str, uint16_t locate);
-        void MapLocateToStr(std::array<char, 8> &str, uint16_t locate);
+        void MapStockStr(uint64_t stock, uint16_t locate);
     };
 }
