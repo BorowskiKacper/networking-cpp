@@ -7,7 +7,7 @@
 
 namespace fh_lob
 {
-    void LimitOrderBook::ReduceOrderSize(uint64_t id, uint32_t shares)
+    void LimitOrderBook::ReduceOrderSize(uint16_t locate, uint64_t id, uint32_t shares)
     {
         auto it = order_map.find(id);
         if (it == order_map.end())
@@ -24,7 +24,7 @@ namespace fh_lob
         }
     }
 
-    void LimitOrderBook::AddOrder(uint64_t id, char side, uint32_t shares, uint32_t price)
+    void LimitOrderBook::AddOrder(uint16_t locate, uint64_t id, char side, uint32_t shares, uint32_t price)
     {
         Order *order = order_pool.allocate();
         order->id = id;
@@ -37,21 +37,19 @@ namespace fh_lob
 
         order_map[id] = order;
 
-        PriceLevel *level;
-        if (price_map.find(price) == price_map.end())
+        absl::flat_hash_map<uint32_t, PriceLevel *> &price_map = price_level_maps[locate];
+        auto [it, inserted] = price_map.try_emplace(price, nullptr);
+        if (inserted)
         {
-            level = price_level_pool.allocate();
-            level->price = price;
-            price_map[price] = level;
-        }
-        else
-        {
-            level = price_map[price];
+            it->second = price_level_pool.allocate();
+            it->second->price = price;
+            it->second->total_volume = 0;
         }
 
+        PriceLevel *level = it->second;
         level->total_volume += shares;
 
-        if (!level->head)
+        if (inserted)
         {
             level->head = order;
             level->tail = order;
@@ -63,23 +61,24 @@ namespace fh_lob
             level->tail = order;
         }
     }
-    void LimitOrderBook::ExecuteOrder(uint64_t id, uint32_t shares)
+
+    void LimitOrderBook::ExecuteOrder(uint16_t locate, uint64_t id, uint32_t shares)
     {
         ReduceOrderSize(id, shares);
     }
 
-    void LimitOrderBook::ExecuteOrderWithPrice(uint64_t id, uint32_t shares, uint32_t price)
+    void LimitOrderBook::ExecuteOrderWithPrice(uint16_t locate, uint64_t id, uint32_t shares, uint32_t price)
     {
         ReduceOrderSize(id, shares);
         price = price; // handle warning
     }
 
-    void LimitOrderBook::CancelOrder(uint64_t id, uint32_t shares)
+    void LimitOrderBook::CancelOrder(uint16_t locate, uint64_t id, uint32_t shares)
     {
         ReduceOrderSize(id, shares);
     }
 
-    void LimitOrderBook::DeleteOrder(uint64_t id)
+    void LimitOrderBook::DeleteOrder(uint16_t locate, uint64_t id)
     {
         auto it = order_map.find(id);
         if (it == order_map.end())

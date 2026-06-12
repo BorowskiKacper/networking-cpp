@@ -89,7 +89,7 @@ namespace fh_lob
         absl::flat_hash_map<uint64_t, uint16_t> str_to_locate;
         std::vector<uint64_t> locate_to_str;
 
-        void ReduceOrderSize(uint64_t id, uint32_t shares);
+        void ReduceOrderSize(uint16_t locate, uint64_t id, uint32_t shares);
 
     public:
         LimitOrderBook(size_t orders, size_t price_levels, size_t locates) : order_pool(orders), price_level_pool(price_levels)
@@ -99,11 +99,11 @@ namespace fh_lob
             str_to_locate.reserve(locates);
         }
 
-        void AddOrder(uint64_t id, char side, uint32_t shares, uint32_t price);
-        void ExecuteOrder(uint64_t id, uint32_t shares);
-        void ExecuteOrderWithPrice(uint64_t id, uint32_t shares, uint32_t price);
-        void CancelOrder(uint64_t id, uint32_t shares);
-        void DeleteOrder(uint64_t id);
+        void AddOrder(uint16_t locate, uint64_t id, char side, uint32_t shares, uint32_t price);
+        void ExecuteOrder(uint16_t locate, uint64_t id, uint32_t shares);
+        void ExecuteOrderWithPrice(uint16_t locate, uint64_t id, uint32_t shares, uint32_t price);
+        void CancelOrder(uint16_t locate, uint64_t id, uint32_t shares);
+        void DeleteOrder(uint16_t locate, uint64_t id);
         void ReplaceOrder(uint64_t old_id, uint64_t new_id, uint32_t shares, uint32_t new_price);
 
         void MapStockStr(uint64_t stock, uint16_t locate);
