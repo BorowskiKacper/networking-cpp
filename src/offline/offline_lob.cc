@@ -40,9 +40,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 
     uint16_t msg_length;
 
-    absl::flat_hash_map<std::string, uint16_t> locate_map;
-    std::vector<fh_lob::LimitOrderBook *> lob_ptrs(10000, nullptr);
-    // absl::flat_hash_map<uint16_t, fh_lob::LimitOrderBook *> lob_map;
+    fh_lob::LimitOrderBook lob(1000000, 500 * 100 * 10000, 10000);
 
     // Metrics variables
     size_t total_message_count = 0;
@@ -59,7 +57,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 
         uint8_t msg_type = static_cast<uint8_t>(*(file + i));
         uint64_t start_cycle = bench::RdtscStart();
-        bool is_complete = fh_lob::ParseMessage(file + i, locate_map, lob_ptrs);
+        bool is_complete = fh_lob::ParseMessage(file + i, lob);
         uint64_t end_cycle = bench::RdtscEnd();
         i += host_msg_length;
 

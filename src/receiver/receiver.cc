@@ -78,8 +78,7 @@ int main(int argc, char **argv)
     struct sockaddr_in sender_addr;
     socklen_t sender_len = sizeof(sender_addr);
 
-    absl::flat_hash_map<std::string, uint16_t> locate_map;
-    absl::flat_hash_map<uint16_t, fh_lob::LimitOrderBook *> lob_map;
+    fh_lob::LimitOrderBook lob(1000000, 500 * 100 * 10000, 10000);
 
     // Metrics variables
     size_t moldudp_messages = 0;
@@ -98,7 +97,7 @@ int main(int argc, char **argv)
             perror("Receive failed");
         }
 
-        bool is_complete = fh_lob::ParseMoldUDP64(buffer, locate_map, lob_map, total_message_count);
+        bool is_complete = fh_lob::ParseMoldUDP64(buffer, lob, total_message_count);
         moldudp_messages++;
 
         if (is_complete)
