@@ -16,11 +16,12 @@ namespace fh_lob
         Order *order = it->second;
 
         if (order->shares <= shares)
-            DeleteOrder(id);
+            DeleteOrder(locate, id);
         else
         {
             order->shares -= shares;
-            price_map[order->price]->total_volume -= shares;
+            absl::flat_hash_map<uint32_t, PriceLevel *> &price_level_map = price_level_maps[locate];
+            price_level_map[order->price]->total_volume -= shares;
         }
     }
 
@@ -37,8 +38,8 @@ namespace fh_lob
 
         order_map[id] = order;
 
-        absl::flat_hash_map<uint32_t, PriceLevel *> &price_map = price_level_maps[locate];
-        auto [it, inserted] = price_map.try_emplace(price, nullptr);
+        absl::flat_hash_map<uint32_t, PriceLevel *> &price_level_map = price_level_maps[locate];
+        auto [it, inserted] = price_level_map.try_emplace(price, nullptr);
         if (inserted)
         {
             it->second = price_level_pool.allocate();
@@ -49,7 +50,7 @@ namespace fh_lob
         PriceLevel *level = it->second;
         level->total_volume += shares;
 
-        if (inserted)
+        if (level->head == nullptr)
         {
             level->head = order;
             level->tail = order;
@@ -64,18 +65,18 @@ namespace fh_lob
 
     void LimitOrderBook::ExecuteOrder(uint16_t locate, uint64_t id, uint32_t shares)
     {
-        ReduceOrderSize(id, shares);
+        ReduceOrderSize(locate, id, shares);
     }
 
     void LimitOrderBook::ExecuteOrderWithPrice(uint16_t locate, uint64_t id, uint32_t shares, uint32_t price)
     {
-        ReduceOrderSize(id, shares);
+        ReduceOrderSize(locate, id, shares);
         price = price; // handle warning
     }
 
     void LimitOrderBook::CancelOrder(uint16_t locate, uint64_t id, uint32_t shares)
     {
-        ReduceOrderSize(id, shares);
+        ReduceOrderSize(locate, id, shares);
     }
 
     void LimitOrderBook::DeleteOrder(uint16_t locate, uint64_t id)
@@ -85,7 +86,8 @@ namespace fh_lob
             return; // Order not found
 
         Order *order = it->second;
-        PriceLevel *level = price_map[order->price];
+        absl::flat_hash_map<uint32_t, PriceLevel *> &price_level_map = price_level_maps[locate];
+        PriceLevel *level = price_level_map[order->price];
 
         if (order->next)
             order->next->prev = order->prev;
@@ -100,37 +102,23 @@ namespace fh_lob
         if (level->total_volume == 0)
         {
             // price_level_pool.deallocate(level);
-            // price_map.erase(order->price);
+            // price_level_map.erase(order->price);
         }
 
         order_map.erase(id);
         order_pool.deallocate(order);
     }
 
-    void LimitOrderBook::ReplaceOrder(uint64_t old_id, uint64_t new_id, uint32_t shares, uint32_t new_price)
+    void LimitOrderBook::ReplaceOrder(uint16_t locate, uint64_t old_id, uint64_t new_id, uint32_t shares, uint32_t new_price)
     {
         auto it = order_map.find(old_id);
         if (it == order_map.end())
             return; // Order not found
 
         Order *order = it->second;
-        // PriceLevel *level = price_map[order->price];
-
-        // REVISIT: is this implementation correct? should I ignore how many shares there were previously or not?
         char side = order->side;
-        DeleteOrder(old_id);
-        AddOrder(new_id, side, shares, new_price);
-        // if (level->price != new_price || order->shares < shares)
-        // {
-        //     char side = order->side;
-        //     DeleteOrder(old_id);
-        //     AddOrder(new_id, side, shares, new_price);
-        // }
-        // else
-        // {
-        //     ReduceOrderSize(old_id, order->shares - shares);
-        //     // replace old_id with new_id
-        // }
+        DeleteOrder(locate, old_id);
+        AddOrder(locate, new_id, side, shares, new_price);
     }
 
     void LimitOrderBook::MapStockStr(uint64_t stock, uint16_t locate)
@@ -146,5 +134,4 @@ namespace fh_lob
         str_to_locate.try_emplace(stock, locate);
         locate_to_str[locate] = stock;
     }
-
 }

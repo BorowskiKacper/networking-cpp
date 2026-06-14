@@ -104,7 +104,7 @@ namespace fh_lob
         void ExecuteOrderWithPrice(uint16_t locate, uint64_t id, uint32_t shares, uint32_t price);
         void CancelOrder(uint16_t locate, uint64_t id, uint32_t shares);
         void DeleteOrder(uint16_t locate, uint64_t id);
-        void ReplaceOrder(uint64_t old_id, uint64_t new_id, uint32_t shares, uint32_t new_price);
+        void ReplaceOrder(uint16_t locate, uint64_t old_id, uint64_t new_id, uint32_t shares, uint32_t new_price);
 
         void MapStockStr(uint64_t stock, uint16_t locate);
     };
