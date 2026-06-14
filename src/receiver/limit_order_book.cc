@@ -27,7 +27,7 @@ namespace fh_lob
 
     void LimitOrderBook::AddOrder(uint16_t locate, uint64_t id, char side, uint32_t shares, uint32_t price)
     {
-        Order *order = order_pool.allocate();
+        Order *order = order_pool.allocate(true);
         order->id = id;
         order->side = side;
         order->shares = shares;
@@ -42,7 +42,7 @@ namespace fh_lob
         auto [it, inserted] = price_level_map.try_emplace(price, nullptr);
         if (inserted)
         {
-            it->second = price_level_pool.allocate();
+            it->second = price_level_pool.allocate(false);
             it->second->price = price;
             it->second->total_volume = 0;
         }

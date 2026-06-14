@@ -34,7 +34,7 @@ namespace fh_lob
     public:
         MemoryPool(size_t capacity);
 
-        T *allocate();
+        T *allocate(/*TEMPORARY*/ bool pool_type);
         void deallocate(T *type);
     };
 
@@ -51,7 +51,7 @@ namespace fh_lob
     }
 
     template <typename T>
-    T *MemoryPool<T>::allocate()
+    T *MemoryPool<T>::allocate(bool pool_type)
     {
         if (free_list.empty())
         {
@@ -63,7 +63,7 @@ namespace fh_lob
                 free_list.push_back(&new_chunk[i]);
             }
 
-            std::cout << "Memory pool exhausted! Fallback chunk allocated" << std::endl;
+            std::cout << "Memory pool exhausted! Fallback chunk allocated | " << (pool_type ? "order_pool" : "price_level_pool") << std::endl;
         }
 
         T *type = free_list.back();
