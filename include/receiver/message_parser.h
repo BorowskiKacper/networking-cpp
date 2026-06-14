@@ -104,15 +104,18 @@ namespace fh_lob
 
 #pragma pack(pop) // Restore default alignment
 
-    void ParseAddOrder(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
-    void ParseAddMPIDOrder(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
-    void ParseOrderExecuted(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
-    void ParseOrderExecutedPrice(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
-    void ParseOrderCancel(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
-    void ParseOrderDelete(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
-    void ParseOrderReplace(const char *msg_buffer, std::vector<LimitOrderBook *> &lob_ptrs);
+    bool ParseSystemEvent(const char *msg_buffer);
+    void ParseStockDirectory(const char *msg_buffer, LimitOrderBook &lob);
+
+    void ParseAddOrder(const char *msg_buffer, LimitOrderBook &lob);
+    void ParseAddMPIDOrder(const char *msg_buffer, LimitOrderBook &lob);
+    void ParseOrderExecuted(const char *msg_buffer, LimitOrderBook &lob);
+    void ParseOrderExecutedPrice(const char *msg_buffer, LimitOrderBook &lob);
+    void ParseOrderCancel(const char *msg_buffer, LimitOrderBook &lob);
+    void ParseOrderDelete(const char *msg_buffer, LimitOrderBook &lob);
+    void ParseOrderReplace(const char *msg_buffer, LimitOrderBook &lob);
 
     // return true if last message has been detected, false otherwise
-    bool ParseMessage(const char *msg_buffer, absl::flat_hash_map<std::string, uint16_t> &locate_map, std::vector<LimitOrderBook *> &lob_ptrs);
-    bool ParseMoldUDP64(const char *msg_buffer, absl::flat_hash_map<std::string, uint16_t> &locate_map, std::vector<LimitOrderBook *> &lob_ptrs, size_t &total_message_count);
+    bool ParseMessage(const char *msg_buffer, LimitOrderBook &lob);
+    bool ParseMoldUDP64(const char *msg_buffer, LimitOrderBook &lob, size_t &total_message_count);
 }
