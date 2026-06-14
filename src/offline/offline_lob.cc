@@ -40,7 +40,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 
     uint16_t msg_length;
 
-    fh_lob::LimitOrderBook lob(1000000, 500 * 100 * 10000, 10000);
+    fh_lob::LimitOrderBook lob(2000000, 500 * 100 * 10000, 10000);
 
     // Metrics variables
     size_t total_message_count = 0;
