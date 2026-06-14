@@ -29,52 +29,45 @@ namespace fh_lob
     {
     private:
         std::vector<T> pool;
-        std::vector<T *> free_list;
+        std::vector<uint32_t> free_list;
 
     public:
-        MemoryPool(size_t capacity);
+        static constexpr uint32_t NIL = UINT32_MAX;
+        MemoryPool(uint32_t capacity)
+        {
+            pool.resize(capacity);
+            free_list.reserve(capacity);
+            for (uint32_t i = capacity; i-- > 0;)
+            {
+                free_list.push_back(i);
+            }
+        }
 
-        T *allocate();
-        void deallocate(T *type);
+        uint32_t allocate_index();
+        void deallocate_index(uint32_t index);
+        T *get(uint32_t index);
     };
 
     template <typename T>
-    MemoryPool<T>::MemoryPool(size_t capacity)
-    {
-        pool.resize(capacity);
-        free_list.reserve(capacity);
-        // Push all pointers to the free list
-        for (size_t i = 0; i < capacity; i++)
-        {
-            free_list.push_back(&pool[i]);
-        }
-    }
-
-    template <typename T>
-    T *MemoryPool<T>::allocate()
+    uint32_t MemoryPool<T>::allocate_index()
     {
         if (free_list.empty())
-        {
-            size_t chunk_size = 10000;
-            T *new_chunk = new T[chunk_size];
-
-            for (size_t i = 0; i < chunk_size; i++)
-            {
-                free_list.push_back(&new_chunk[i]);
-            }
-
-            std::cout << "Memory pool exhausted! Fallback chunk allocated" << std::endl;
-        }
-
-        T *type = free_list.back();
+            throw std::runtime_error("pool exhausted");
+        uint32_t index = free_list.back();
         free_list.pop_back();
-        return type;
+        return index;
     }
 
     template <typename T>
-    void MemoryPool<T>::deallocate(T *type)
+    void MemoryPool<T>::deallocate_index(uint32_t index)
     {
-        free_list.push_back(type);
+        free_list.push_back(index);
+    }
+
+    template <typename T>
+    T *MemoryPool<T>::get(uint32_t index)
+    {
+        return &pool[index];
     }
 
     class LimitOrderBook
@@ -83,7 +76,7 @@ namespace fh_lob
         MemoryPool<Order> order_pool;
         MemoryPool<PriceLevel> price_level_pool;
 
-        std::vector<Order *> orders;                                               // stock locate --> order
+        std::vector<uint32_t> orders;                                              // stock locate --> order
         std::vector<absl::flat_hash_map<uint32_t, PriceLevel *>> price_level_maps; // stock locate --> price level map --> price level
 
         absl::flat_hash_map<uint64_t, uint16_t> str_to_locate;
@@ -92,12 +85,12 @@ namespace fh_lob
         void ReduceOrderSize(uint16_t locate, uint64_t id, uint32_t shares);
 
     public:
-        LimitOrderBook(size_t order_pool, size_t price_level_pool, size_t locates, size_t total_messages) : order_pool(order_pool), price_level_pool(price_level_pool)
+        LimitOrderBook(size_t order_pool, size_t price_level_pool, size_t locates, size_t max_order_ref_number) : order_pool(order_pool), price_level_pool(price_level_pool)
         {
             price_level_maps.resize(locates);
             locate_to_str.resize(locates);
             str_to_locate.reserve(locates);
-            orders.resize(total_messages);
+            orders.resize(max_order_ref_number, MemoryPool<Order>::NIL);
         }
 
         void AddOrder(uint16_t locate, uint64_t order_ref_number, char side, uint32_t shares, uint32_t price);
