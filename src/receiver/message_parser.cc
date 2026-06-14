@@ -53,54 +53,69 @@ namespace fh_lob
     {
         const auto *msg = reinterpret_cast<const AddOrderMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
+        uint64_t order_ref_number = be64toh(msg->order_ref_number);
+        uint32_t shares = ntohl(msg->shares);
+        uint32_t price = ntohl(msg->price);
         lob.AddOrder(locate,
-                     msg->order_ref_number,
+                     order_ref_number,
                      msg->buy_sell_indicator,
-                     msg->shares,
-                     msg->price);
+                     shares,
+                     price);
     }
 
     void ParseOrderExecuted(const char *msg_buffer, LimitOrderBook &lob)
     {
         const auto *msg = reinterpret_cast<const OrderExecutedMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
+        uint64_t order_ref_number = be64toh(msg->order_ref_number);
+        uint32_t executed_shares = ntohl(msg->executed_shares);
         lob.ExecuteOrder(locate,
-                         msg->order_ref_number,
-                         msg->executed_shares);
+                         order_ref_number,
+                         executed_shares);
     }
     void ParseOrderExecutedPrice(const char *msg_buffer, LimitOrderBook &lob)
     {
         const auto *msg = reinterpret_cast<const OrderExecutedPriceMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
+        uint64_t order_ref_number = be64toh(msg->order_ref_number);
+        uint32_t executed_shares = ntohl(msg->executed_shares);
+        uint32_t execution_price = ntohl(msg->execution_price);
         lob.ExecuteOrderWithPrice(locate,
-                                  msg->order_ref_number,
-                                  msg->executed_shares,
-                                  msg->execution_price);
+                                  order_ref_number,
+                                  executed_shares,
+                                  execution_price);
     }
     void ParseOrderCancel(const char *msg_buffer, LimitOrderBook &lob)
     {
         const auto *msg = reinterpret_cast<const OrderCancelMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
+        uint64_t order_ref_number = be64toh(msg->order_ref_number);
+        uint32_t cancelled_shares = ntohl(msg->cancelled_shares);
         lob.CancelOrder(locate,
-                        msg->order_ref_number,
-                        msg->cancelled_shares);
+                        order_ref_number,
+                        cancelled_shares);
     }
     void ParseOrderDelete(const char *msg_buffer, LimitOrderBook &lob)
     {
         const auto *msg = reinterpret_cast<const OrderDeleteMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
+        uint64_t order_ref_number = be64toh(msg->order_ref_number);
         lob.DeleteOrder(locate,
-                        msg->order_ref_number);
+                        order_ref_number);
     }
     void ParseOrderReplace(const char *msg_buffer, LimitOrderBook &lob)
     {
         const auto *msg = reinterpret_cast<const OrderReplaceMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
+        uint64_t og_order_ref_number = be64toh(msg->og_order_ref_number);
+        uint64_t new_order_ref_number = be64toh(msg->new_order_ref_number);
+        uint32_t shares = ntohl(msg->shares);
+        uint32_t price = ntohl(msg->price);
         lob.ReplaceOrder(locate,
-                         msg->og_order_ref_number,
-                         msg->new_order_ref_number,
-                         msg->shares,
-                         msg->price);
+                         og_order_ref_number,
+                         new_order_ref_number,
+                         shares,
+                         price);
     }
 
     bool ParseMessage(const char *msg_buffer, LimitOrderBook &lob)
