@@ -10,7 +10,7 @@ namespace fh_lob
     {
         Order *next = nullptr;
         Order *prev = nullptr;
-        uint64_t id;
+        uint64_t order_ref_number;
         char side;
         uint32_t shares;
         uint32_t price;
@@ -83,7 +83,7 @@ namespace fh_lob
         MemoryPool<Order> order_pool;
         MemoryPool<PriceLevel> price_level_pool;
 
-        absl::flat_hash_map<uint64_t, Order *> order_map;                          // stock locate --> order
+        std::vector<Order *> orders;                                               // stock locate --> order
         std::vector<absl::flat_hash_map<uint32_t, PriceLevel *>> price_level_maps; // stock locate --> price level map --> price level
 
         absl::flat_hash_map<uint64_t, uint16_t> str_to_locate;
@@ -92,19 +92,20 @@ namespace fh_lob
         void ReduceOrderSize(uint16_t locate, uint64_t id, uint32_t shares);
 
     public:
-        LimitOrderBook(size_t orders, size_t price_levels, size_t locates) : order_pool(orders), price_level_pool(price_levels)
+        LimitOrderBook(size_t order_pool, size_t price_level_pool, size_t locates, size_t total_messages) : order_pool(order_pool), price_level_pool(price_level_pool)
         {
             price_level_maps.resize(locates);
             locate_to_str.resize(locates);
             str_to_locate.reserve(locates);
+            orders.resize(total_messages);
         }
 
-        void AddOrder(uint16_t locate, uint64_t id, char side, uint32_t shares, uint32_t price);
-        void ExecuteOrder(uint16_t locate, uint64_t id, uint32_t shares);
-        void ExecuteOrderWithPrice(uint16_t locate, uint64_t id, uint32_t shares, uint32_t price);
-        void CancelOrder(uint16_t locate, uint64_t id, uint32_t shares);
-        void DeleteOrder(uint16_t locate, uint64_t id);
-        void ReplaceOrder(uint16_t locate, uint64_t old_id, uint64_t new_id, uint32_t shares, uint32_t new_price);
+        void AddOrder(uint16_t locate, uint64_t order_ref_number, char side, uint32_t shares, uint32_t price);
+        void ExecuteOrder(uint16_t locate, uint64_t order_ref_number, uint32_t shares);
+        void ExecuteOrderWithPrice(uint16_t locate, uint64_t order_ref_number, uint32_t shares, uint32_t price);
+        void CancelOrder(uint16_t locate, uint64_t order_ref_number, uint32_t shares);
+        void DeleteOrder(uint16_t locate, uint64_t order_ref_number);
+        void ReplaceOrder(uint16_t locate, uint64_t old_order_ref_number, uint64_t new_order_ref_number, uint32_t shares, uint32_t new_price);
 
         void MapStockStr(uint64_t stock, uint16_t locate);
     };

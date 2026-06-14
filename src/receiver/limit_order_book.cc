@@ -7,16 +7,21 @@
 
 namespace fh_lob
 {
-    void LimitOrderBook::ReduceOrderSize(uint16_t locate, uint64_t id, uint32_t shares)
+    void LimitOrderBook::ReduceOrderSize(uint16_t locate, uint64_t order_ref_number, uint32_t shares)
     {
-        auto it = order_map.find(id);
-        if (it == order_map.end())
+        Order *order;
+        try
+        {
+            order = orders[order_ref_number];
+        }
+        catch (const std::runtime_error &e)
+        {
+            std::cerr << "Error: " << e.what() << std::endl;
             return;
-
-        Order *order = it->second;
+        }
 
         if (order->shares <= shares)
-            DeleteOrder(locate, id);
+            DeleteOrder(locate, order_ref_number);
         else
         {
             order->shares -= shares;
@@ -25,10 +30,10 @@ namespace fh_lob
         }
     }
 
-    void LimitOrderBook::AddOrder(uint16_t locate, uint64_t id, char side, uint32_t shares, uint32_t price)
+    void LimitOrderBook::AddOrder(uint16_t locate, uint64_t order_ref_number, char side, uint32_t shares, uint32_t price)
     {
         Order *order = order_pool.allocate();
-        order->id = id;
+        order->order_ref_number = order_ref_number;
         order->side = side;
         order->shares = shares;
         order->price = price;
@@ -36,7 +41,15 @@ namespace fh_lob
         order->next = nullptr;
         order->prev = nullptr;
 
-        order_map[id] = order;
+        try
+        {
+            orders[order_ref_number] = order;
+        }
+        catch (const std::runtime_error &e)
+        {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return;
+        }
 
         absl::flat_hash_map<uint32_t, PriceLevel *> &price_level_map = price_level_maps[locate];
         auto [it, inserted] = price_level_map.try_emplace(price, nullptr);
@@ -63,29 +76,35 @@ namespace fh_lob
         }
     }
 
-    void LimitOrderBook::ExecuteOrder(uint16_t locate, uint64_t id, uint32_t shares)
+    void LimitOrderBook::ExecuteOrder(uint16_t locate, uint64_t order_ref_number, uint32_t shares)
     {
-        ReduceOrderSize(locate, id, shares);
+        ReduceOrderSize(locate, order_ref_number, shares);
     }
 
-    void LimitOrderBook::ExecuteOrderWithPrice(uint16_t locate, uint64_t id, uint32_t shares, uint32_t price)
+    void LimitOrderBook::ExecuteOrderWithPrice(uint16_t locate, uint64_t order_ref_number, uint32_t shares, uint32_t price)
     {
-        ReduceOrderSize(locate, id, shares);
+        ReduceOrderSize(locate, order_ref_number, shares);
         price = price; // handle warning
     }
 
-    void LimitOrderBook::CancelOrder(uint16_t locate, uint64_t id, uint32_t shares)
+    void LimitOrderBook::CancelOrder(uint16_t locate, uint64_t order_ref_number, uint32_t shares)
     {
-        ReduceOrderSize(locate, id, shares);
+        ReduceOrderSize(locate, order_ref_number, shares);
     }
 
-    void LimitOrderBook::DeleteOrder(uint16_t locate, uint64_t id)
+    void LimitOrderBook::DeleteOrder(uint16_t locate, uint64_t order_ref_number)
     {
-        auto it = order_map.find(id);
-        if (it == order_map.end())
-            return; // Order not found
+        Order *order;
+        try
+        {
+            order = orders[order_ref_number];
+        }
+        catch (const std::runtime_error &e)
+        {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return;
+        }
 
-        Order *order = it->second;
         absl::flat_hash_map<uint32_t, PriceLevel *> &price_level_map = price_level_maps[locate];
         PriceLevel *level = price_level_map[order->price];
 
@@ -105,20 +124,27 @@ namespace fh_lob
             // price_level_map.erase(order->price);
         }
 
-        order_map.erase(id);
+        // order_map.erase(id);
+        orders[order_ref_number] = nullptr;
         order_pool.deallocate(order);
     }
 
-    void LimitOrderBook::ReplaceOrder(uint16_t locate, uint64_t old_id, uint64_t new_id, uint32_t shares, uint32_t new_price)
+    void LimitOrderBook::ReplaceOrder(uint16_t locate, uint64_t old_order_ref_number, uint64_t new_order_ref_number, uint32_t shares, uint32_t new_price)
     {
-        auto it = order_map.find(old_id);
-        if (it == order_map.end())
-            return; // Order not found
+        Order *order;
+        try
+        {
+            order = orders[old_order_ref_number];
+        }
+        catch (const std::runtime_error &e)
+        {
+            std::cerr << "Error: " << e.what() << std::endl;
+            return;
+        }
 
-        Order *order = it->second;
         char side = order->side;
-        DeleteOrder(locate, old_id);
-        AddOrder(locate, new_id, side, shares, new_price);
+        DeleteOrder(locate, old_order_ref_number);
+        AddOrder(locate, new_order_ref_number, side, shares, new_price);
     }
 
     void LimitOrderBook::MapStockStr(uint64_t stock, uint16_t locate)

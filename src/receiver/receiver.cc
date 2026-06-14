@@ -78,7 +78,7 @@ int main(int argc, char **argv)
     struct sockaddr_in sender_addr;
     socklen_t sender_len = sizeof(sender_addr);
 
-    fh_lob::LimitOrderBook lob(1000000, 500 * 100 * 10000, 10000);
+    fh_lob::LimitOrderBook lob(1000000, 500 * 100 * 10000, 10000, 300000000);
 
     // Metrics variables
     size_t moldudp_messages = 0;
