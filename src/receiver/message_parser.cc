@@ -44,7 +44,9 @@ namespace fh_lob
     {
         const auto *msg = reinterpret_cast<const StockDirectoryMsg *>(msg_buffer);
         uint16_t locate = ntohs(msg->header.stock_locate);
-        lob.MapStockStr(reinterpret_cast<uint64_t>(msg->stock, sizeof(char) * 8), locate);
+        uint64_t stock;
+        std::memcpy(&stock, msg->stock, sizeof(stock));
+        lob.MapStockStr(stock, locate);
     }
 
     void ParseAddOrder(const char *msg_buffer, LimitOrderBook &lob)
