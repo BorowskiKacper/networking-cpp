@@ -90,6 +90,14 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
     std::cout << "ns_per_cycle: " << ns_per_cycle << std::endl;
     std::cout << "Again find ns_per_cycle: " << second_ns_per_cycle << std::endl;
 
+    std::vector<uint8_t> msg_types{'S', 'R', 'A', 'F', 'E', 'C', 'X', 'D', 'U'};
+    for (uint8_t msg_type : msg_types)
+    {
+
+        std::cout << "\nmsg_type: " << msg_type << std::endl;
+        bench::hist[msg_type].PrintSummary(ns_per_cycle);
+    }
+
     overall_hist.Save("./histograms/overall_hist.txt");
 
     return EXIT_SUCCESS;
