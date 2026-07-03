@@ -37,6 +37,16 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
     std::cout << "file size is " << file_size << std::endl;
 
     const char *file = static_cast<const char *>(mmap(nullptr, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
+    if (file == MAP_FAILED)
+    {
+        perror("MAP_FAILED\n");
+        return EXIT_FAILURE;
+    }
+
+    if (madvise(const_cast<char *>(file), sb.st_size, MADV_SEQUENTIAL) == -1)
+    {
+        perror("madvise");
+    }
 
     uint16_t msg_length;
 

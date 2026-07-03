@@ -6,32 +6,32 @@
 * Cache Misses (The Diagnostic Metric): Mimimize cache misses as much as possible to maximize throughput.
 
 ## Current Scores:
-* Throughput (msgs/sec): 4.19677e+06
-    * Total Time (ns): 64036029731
+* Throughput (msgs/sec): 4.11172e+06
+    * Total Time (ns): 65360658015
     * Total Messages (msgs): 268744780
-* Processing Time per Message (ns/msg): 387.937
+* Processing Time per Message (ns/msg): 410.44
 * Maximum Latency:
     * Overall Histogram (ns/msg):
-        * p50: 133.533
-        * p90: 365.691
-        * p99: 917.552
-        * p99.9: 4379.43
-        * max: 3.28273e+07
+        * p50: 140.181
+        * p90: 401.152
+        * p99: 988.473
+        * p99.9: 6418.43
+        * max: 1.35599e+07
     * total (msgs): 268734779
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554077
 ns_per_cycle: 0.554077
-Again find ns_per_cycle: 0.554076
+Again find ns_per_cycle: 0.554078
 
 msg_type: S
-* Processing Time per Message (ns/msg): 60634
+* Processing Time per Message (ns/msg): 985175
 * Maximum Latency:
     * Overall Histogram (ns/msg):
-        * p50: 41134.7
-        * p90: 47943.2
-        * p99: 47943.2
-        * p99.9: 47943.2
-        * max: 48025.2
+        * p50: 56453.8
+        * p90: 2.52368e+06
+        * p99: 2.52368e+06
+        * p99.9: 2.52368e+06
+        * max: 2.52242e+06
     * total (msgs): 5
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554077
@@ -50,92 +50,92 @@ msg_type: R
     * ns_per_cycle (ns/cycle): 0.554077
 
 msg_type: A
-* Processing Time per Message (ns/msg): 385.5
+* Processing Time per Message (ns/msg): 405.564
 * Maximum Latency:
     * Overall Histogram (ns/msg):
-        * p50: 123.559
-        * p90: 352.393
-        * p99: 899.821
-        * p99.9: 4450.35
-        * max: 1.06647e+07
+        * p50: 129.1
+        * p90: 387.854
+        * p99: 970.743
+        * p99.9: 6489.35
+        * max: 1.21208e+07
     * total (msgs): 117145568
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554077
 
 msg_type: F
-* Processing Time per Message (ns/msg): 311.384
+* Processing Time per Message (ns/msg): 348.573
 * Maximum Latency:
     * Overall Histogram (ns/msg):
-        * p50: 55.9618
-        * p90: 273.714
-        * p99: 846.63
-        * p99.9: 5283.68
-        * max: 554079
+        * p50: 55.4077
+        * p90: 290.336
+        * p99: 890.956
+        * p99.9: 7198.57
+        * max: 1.05549e+06
     * total (msgs): 1485888
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554077
 
 msg_type: E
-* Processing Time per Message (ns/msg): 371.214
+* Processing Time per Message (ns/msg): 393.077
 * Maximum Latency:
     * Overall Histogram (ns/msg):
-        * p50: 114.694
-        * p90: 370.124
-        * p99: 917.552
-        * p99.9: 4166.66
-        * max: 1.84284e+06
+        * p50: 121.343
+        * p90: 410.017
+        * p99: 979.608
+        * p99.9: 5851.05
+        * max: 6.57248e+06
     * total (msgs): 5722824
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554077
 
 msg_type: C
-* Processing Time per Message (ns/msg): 246.92
+* Processing Time per Message (ns/msg): 278.55
 * Maximum Latency:
     * Overall Histogram (ns/msg):
-        * p50: 44.3262
-        * p90: 269.282
-        * p99: 820.034
-        * p99.9: 2500
-        * max: 438379
+        * p50: 47.0965
+        * p90: 285.904
+        * p99: 855.495
+        * p99.9: 3351.06
+        * max: 521644
     * total (msgs): 99917
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554077
 
 msg_type: X
-* Processing Time per Message (ns/msg): 257.984
+* Processing Time per Message (ns/msg): 273.732
 * Maximum Latency:
     * Overall Histogram (ns/msg):
-        * p50: 52.0833
-        * p90: 262.633
-        * p99: 802.304
-        * p99.9: 2012.41
-        * max: 707731
+        * p50: 53.1914
+        * p90: 275.93
+        * p99: 837.764
+        * p99.9: 3528.36
+        * max: 4.84506e+06
     * total (msgs): 2787676
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554077
 
 msg_type: D
-* Processing Time per Message (ns/msg): 373.428
+* Processing Time per Message (ns/msg): 396.378
 * Maximum Latency:
     * Overall Histogram (ns/msg):
-        * p50: 145.168
-        * p90: 330.23
-        * p99: 882.091
-        * p99.9: 4024.82
-        * max: 3.28273e+07
+        * p50: 151.817
+        * p90: 365.691
+        * p99: 935.282
+        * p99.9: 5709.21
+        * max: 1.35599e+07
     * total (msgs): 114360997
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554077
 
 msg_type: U
-* Processing Time per Message (ns/msg): 597.877
+* Processing Time per Message (ns/msg): 636.31
 * Maximum Latency:
     * Overall Histogram (ns/msg):
-        * p50: 231.604
-        * p90: 598.403
-        * p99: 1130.32
-        * p99.9: 8758.85
-        * max: 2.30042e+06
+        * p50: 242.686
+        * p90: 660.46
+        * p99: 1250
+        * p99.9: 10851
+        * max: 3.7367e+06
     * total (msgs): 21639067
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554077
