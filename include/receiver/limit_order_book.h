@@ -10,7 +10,6 @@ namespace fh_lob
     {
         Order *next = nullptr;
         Order *prev = nullptr;
-        uint64_t order_ref_number;
         char side;
         uint32_t shares;
         uint32_t price;

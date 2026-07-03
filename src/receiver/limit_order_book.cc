@@ -30,7 +30,6 @@ namespace fh_lob
     {
         uint32_t order_index = order_pool.allocate_index();
         Order *order = order_pool.get(order_index);
-        order->order_ref_number = order_ref_number;
         order->side = side;
         order->shares = shares;
         order->price = price;
