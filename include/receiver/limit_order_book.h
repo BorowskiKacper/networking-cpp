@@ -6,23 +6,6 @@
 
 namespace fh_lob
 {
-    struct Order
-    {
-        Order *next = nullptr;
-        Order *prev = nullptr;
-        char side;
-        uint32_t shares;
-        uint32_t price;
-    };
-
-    struct PriceLevel
-    {
-        Order *head = nullptr;
-        Order *tail = nullptr;
-        uint32_t price;
-        uint32_t total_volume;
-    };
-
     template <typename T>
     class MemoryPool
     {
@@ -68,6 +51,23 @@ namespace fh_lob
     {
         return &pool[index];
     }
+
+    struct Order
+    {
+        uint32_t next = MemoryPool<Order>::NIL;
+        uint32_t prev = MemoryPool<Order>::NIL;
+        char side;
+        uint32_t shares;
+        uint32_t price;
+    };
+
+    struct PriceLevel
+    {
+        uint32_t head = MemoryPool<Order>::NIL;
+        uint32_t tail = MemoryPool<Order>::NIL;
+        uint32_t price;
+        uint32_t total_volume;
+    };
 
     class LimitOrderBook
     {

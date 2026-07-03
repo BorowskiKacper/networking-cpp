@@ -6,17 +6,17 @@
 * Cache Misses (The Diagnostic Metric): Mimimize cache misses as much as possible to maximize throughput.
 
 ## Current Scores:
-* Throughput (msgs/sec): 3.71091e+06
-    * Total Time (ns): 72420154960
+* Throughput (msgs/sec): 4.05181e+06
+    * Total Time (ns): 66327050484
     * Total Messages (msgs): 268744780
-* Processing Time per Message (ns/msg): 447.897
+* Processing Time per Message (ns/msg): 406.147
 * Maximum Latency:
     * Overall Histogram (ns/msg):
-        * p50: 151.817
-        * p90: 463.209
-        * p99: 1023.94
-        * p99.9: 3351.06
-        * max: 5.15068e+06
+        * p50: 135.749
+        * p90: 423.315
+        * p99: 988.475
+        * p99.9: 4858.15
+        * max: 1.15381e+08
     * total (msgs): 268734779
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554078

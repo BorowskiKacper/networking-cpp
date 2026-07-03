@@ -34,8 +34,8 @@ namespace fh_lob
         order->shares = shares;
         order->price = price;
 
-        order->next = nullptr;
-        order->prev = nullptr;
+        order->next = MemoryPool<Order>::NIL;
+        order->prev = MemoryPool<Order>::NIL;
 
         orders[order_ref_number] = order_index;
 
@@ -51,16 +51,16 @@ namespace fh_lob
         PriceLevel *level = it->second;
         level->total_volume += shares;
 
-        if (level->head == nullptr)
+        if (level->head == MemoryPool<Order>::NIL)
         {
-            level->head = order;
-            level->tail = order;
+            level->head = order_index;
+            level->tail = order_index;
         }
         else
         {
-            level->tail->next = order;
+            order_pool.get(level->tail)->next = order_index;
             order->prev = level->tail;
-            level->tail = order;
+            level->tail = order_index;
         }
     }
 
@@ -91,12 +91,12 @@ namespace fh_lob
         absl::flat_hash_map<uint32_t, PriceLevel *> &price_level_map = price_level_maps[locate];
         PriceLevel *level = price_level_map[order->price];
 
-        if (order->next)
-            order->next->prev = order->prev;
+        if (order->next != MemoryPool<Order>::NIL)
+            order_pool.get(order->next)->prev = order->prev;
         else
             level->tail = order->prev;
-        if (order->prev)
-            order->prev->next = order->next;
+        if (order->prev != MemoryPool<Order>::NIL)
+            order_pool.get(order->prev)->next = order->next;
         else
             level->head = order->next;
 
@@ -107,7 +107,6 @@ namespace fh_lob
             // price_level_map.erase(order->price);
         }
 
-        // order_map.erase(id);
         orders[order_ref_number] = MemoryPool<Order>::NIL;
         order_pool.deallocate_index(order_index);
     }
