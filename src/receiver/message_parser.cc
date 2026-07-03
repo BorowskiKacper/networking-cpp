@@ -66,42 +66,34 @@ namespace fh_lob
     void ParseOrderExecuted(const char *msg_buffer, LimitOrderBook &lob)
     {
         const auto *msg = reinterpret_cast<const OrderExecutedMsg *>(msg_buffer);
-        uint16_t locate = ntohs(msg->header.stock_locate);
         uint64_t order_ref_number = be64toh(msg->order_ref_number);
         uint32_t executed_shares = ntohl(msg->executed_shares);
-        lob.ExecuteOrder(locate,
-                         order_ref_number,
+        lob.ExecuteOrder(order_ref_number,
                          executed_shares);
     }
     void ParseOrderExecutedPrice(const char *msg_buffer, LimitOrderBook &lob)
     {
         const auto *msg = reinterpret_cast<const OrderExecutedPriceMsg *>(msg_buffer);
-        uint16_t locate = ntohs(msg->header.stock_locate);
         uint64_t order_ref_number = be64toh(msg->order_ref_number);
         uint32_t executed_shares = ntohl(msg->executed_shares);
         uint32_t execution_price = ntohl(msg->execution_price);
-        lob.ExecuteOrderWithPrice(locate,
-                                  order_ref_number,
+        lob.ExecuteOrderWithPrice(order_ref_number,
                                   executed_shares,
                                   execution_price);
     }
     void ParseOrderCancel(const char *msg_buffer, LimitOrderBook &lob)
     {
         const auto *msg = reinterpret_cast<const OrderCancelMsg *>(msg_buffer);
-        uint16_t locate = ntohs(msg->header.stock_locate);
         uint64_t order_ref_number = be64toh(msg->order_ref_number);
         uint32_t cancelled_shares = ntohl(msg->cancelled_shares);
-        lob.CancelOrder(locate,
-                        order_ref_number,
+        lob.CancelOrder(order_ref_number,
                         cancelled_shares);
     }
     void ParseOrderDelete(const char *msg_buffer, LimitOrderBook &lob)
     {
         const auto *msg = reinterpret_cast<const OrderDeleteMsg *>(msg_buffer);
-        uint16_t locate = ntohs(msg->header.stock_locate);
         uint64_t order_ref_number = be64toh(msg->order_ref_number);
-        lob.DeleteOrder(locate,
-                        order_ref_number);
+        lob.DeleteOrder(order_ref_number);
     }
     void ParseOrderReplace(const char *msg_buffer, LimitOrderBook &lob)
     {
