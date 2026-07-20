@@ -1,3 +1,7 @@
+#include "receiver/message_parser.h"
+#include "receiver/limit_order_book.h"
+#include "receiver/benchmark.h"
+
 #include <sys/types.h>
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -9,10 +13,6 @@
 #include <cstring>
 #include <chrono>
 #include <vector>
-
-#include "receiver/message_parser.h"
-#include "receiver/limit_order_book.h"
-#include "receiver/benchmark.h"
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 {

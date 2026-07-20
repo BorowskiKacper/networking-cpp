@@ -5,7 +5,7 @@
 * Maximum Latency (The Jitter Test): 99th and 99.9th percentile processing times.
 * Cache Misses (The Diagnostic Metric): Mimimize cache misses as much as possible to maximize throughput.
 
-<!-- METRICS_START -->
+<!-- OFFLINE METRICS_START -->
 * Throughput (msgs/sec): 6.89575e+06
     * Total Time (ns): 38972544173
     * Total Messages (msgs): 268744780
@@ -139,7 +139,11 @@ msg_type: U
     * total (msgs): 21639067
     * clipped (msgs): 0
     * ns_per_cycle (ns/cycle): 0.554078
-<!-- METRICS_END -->
+<!-- OFFLINE METRICS_END -->
+
+<!-- ONLINE METRICS_START -->
+<!-- ONLINE METRICS_END -->
+
 
 ## Naming Convention used
 * Files: snake_case (all lowercase with _ (underscores) as separators between words)

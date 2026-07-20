@@ -1,3 +1,5 @@
+#include "shared/mold_udp_64.h"
+
 #include <unistd.h>
 
 #include <iostream>
@@ -8,42 +10,11 @@
 #include <cstring>
 #include <chrono> // for sleep
 #include <thread> // for sleep
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <cassert>
 
-void print_buffer(char *msg_buffer, size_t msg_length)
-{
-    if (msg_length > 0)
-        std::cout << msg_buffer[0] << " ";
-    for (size_t i = 1; i < msg_length; i++)
-    {
-        std::cout << std::hex << std::setw(2) << std::setfill('0')
-                  << (static_cast<unsigned int>(static_cast<unsigned char>(msg_buffer[i]))) << " ";
-    }
-    std::cout << std::dec << std::endl;
-}
-
-int SendMoldUDP64Packet(int udp_fd, sockaddr_in &multicast_addr, char *&moldudp64_buffer, size_t &moldudp64_index, uint64_t &sequence_number, uint16_t &message_count)
-{
-    uint64_t net_sequence_number = htobe64(sequence_number);
-    uint16_t net_message_count = htons(message_count);
-    memcpy(moldudp64_buffer + 10, &net_sequence_number, sizeof(net_sequence_number));
-    memcpy(moldudp64_buffer + 18, &net_message_count, sizeof(net_message_count));
-
-    if (sendto(udp_fd, moldudp64_buffer, moldudp64_index, 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
-    {
-        perror("Failed to send message");
-        close(udp_fd);
-        return EXIT_FAILURE;
-    };
-    // print_buffer(moldudp64_buffer, moldudp64_index);
-
-    moldudp64_index = 20;
-    sequence_number += message_count;
-    message_count = 0;
-
-    return EXIT_SUCCESS;
-}
-
-// namespace fh_lob
 int main(int argc, char *argv[])
 {
     if (argc != 3)
@@ -52,18 +23,9 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    // socket setup
     const char *multicast_ip = argv[1];
     int port = atoi(argv[2]);
-
-    std::ifstream file("itchmessages/12302019.NASDAQ_ITCH50", std::ios::binary);
-
-    if (!file)
-    {
-        std::cout << "Failed to open file. " << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    uint16_t msg_length;
 
     int udp_fd = socket(AF_INET, SOCK_DGRAM, 0);
     if (udp_fd < 0)
@@ -90,89 +52,92 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-    size_t MAX_MOLDUDP64_SIZE = 1472;
-    char *moldudp64_buffer = new char[MAX_MOLDUDP64_SIZE]{};
-    const char *session_id = "Session123";
-    memcpy(moldudp64_buffer, session_id, 10);
-    size_t moldudp64_index = 20;
-    uint64_t sequence_number = 1;
-    uint16_t message_count = 0;
+    // mmap setup
+    int fd = open("itchmessages/12302019.NASDAQ_ITCH50", O_RDONLY, S_IRUSR | S_IWUSR);
+    struct stat sb;
 
-    // Metric variables
-    size_t total_message_count = 0;
+    if (fstat(fd, &sb) == -1)
+    {
+        perror("Couldn't get file size.\n");
+        return EXIT_FAILURE;
+    }
+
+    size_t file_size = static_cast<size_t>(sb.st_size);
+    std::cout << "file size is " << file_size << std::endl;
+
+    const char *file = static_cast<const char *>(mmap(nullptr, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0));
+    if (file == MAP_FAILED)
+    {
+        perror("MAP_FAILED\n");
+        return EXIT_FAILURE;
+    }
+
+    if (madvise(const_cast<char *>(file), sb.st_size, MADV_SEQUENTIAL) == -1)
+    {
+        perror("madvise");
+    }
+
+    // send    
+    const std::string session = "Session123";
+    fh_lob::MoldUDP64Builder builder(session, 1);
+    const char* cursor = file;
+    const char* file_end = file + file_size;
+    
+    size_t msg_count = 0;
+    size_t moldudp64_msg_count = 0;
     auto start_time = std::chrono::steady_clock::now();
 
-    ////////////////////////////////
-    // If PACKET > MAX_SIZE: sendto() and clear packet
-    // always: add to packet
-    // after read through everything in file: sendto()
-    size_t R_count = 0;
-    while (file.read(reinterpret_cast<char *>(&msg_length), sizeof(msg_length)))
+    while (cursor + sizeof(uint16_t) <= file_end)
     {
-        uint16_t host_msg_length = ntohs(msg_length);
+        uint16_t net_length;
+        memcpy(&net_length, cursor, sizeof(net_length));
+        const uint16_t length = ntohs(net_length);
+        assert(length < fh_lob::MoldUDP64Builder::k_max_packet_size);
+        const char* payload = cursor + sizeof(uint16_t);
 
-        if (moldudp64_index + host_msg_length + 2 >= MAX_MOLDUDP64_SIZE)
+        if(!builder.TryAppend(payload, length))
         {
-            total_message_count += message_count; // Metric
-            int res = SendMoldUDP64Packet(udp_fd, multicast_addr, moldudp64_buffer, moldudp64_index, sequence_number, message_count);
-            if (res == EXIT_FAILURE)
+            if (sendto(udp_fd, builder.Finalize(), builder.size(), 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
             {
+                perror("Failed to send message");
+                close(udp_fd);
                 return EXIT_FAILURE;
-            }
-        }
+            };
+            builder.Reset();
+            builder.TryAppend(payload, length);
 
-        message_count++;
-        memcpy(moldudp64_buffer + moldudp64_index, &msg_length, sizeof(msg_length));
-        moldudp64_index += 2;
-
-        if (!file.read(moldudp64_buffer + moldudp64_index, host_msg_length))
-        {
-            perror("Error reading file");
-
-            return EXIT_FAILURE;
+            moldudp64_msg_count++;
         }
-        if (moldudp64_buffer[moldudp64_index] == 'R')
-        {
-            R_count++;
-            std::cout << '|' << R_count << '|';
-        }
-        else
-        {
-            std::cout << moldudp64_buffer[moldudp64_index];
-        }
-        if (moldudp64_buffer[moldudp64_index] == 'S') // && moldudp64_buffer[moldudp64_index + 11] == 'S')
-        {
-            std::cout << "Pausing for 1 second..." << std::endl;
-
-            // Standard way to pause the current thread
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-
-            std::cout << "Resumed!" << std::endl;
-        }
-        moldudp64_index += host_msg_length;
+        
+        msg_count++;
+        cursor = payload + length;
     }
 
-    if (message_count > 0)
+    if(!builder.Empty()) 
     {
-        total_message_count += message_count; // Metric
-        int res = SendMoldUDP64Packet(udp_fd, multicast_addr, moldudp64_buffer, moldudp64_index, sequence_number, message_count);
-        if (res == EXIT_FAILURE)
+        if (sendto(udp_fd, builder.Finalize(), builder.size(), 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
         {
+            perror("Failed to send message");
+            close(udp_fd);
             return EXIT_FAILURE;
-        }
+        };
+        
+        moldudp64_msg_count++;
     }
+
+    munmap(const_cast<char *>(file), file_size);
+    close(fd);
 
     // Calculate Metrics
     auto end_time = std::chrono::steady_clock::now();
     auto time_taken = end_time - start_time;
     std::cout << "=====TIME TAKEN=====\n"
               << std::chrono::duration_cast<std::chrono::nanoseconds>(time_taken).count()
-              << "\n=====TOTAL MESSAGE COUNT=====\n"
-              << total_message_count
+              << "\n=====MESSAGE COUNT=====\n"
+              << msg_count
+              << "\n=====MoldUDP64 MESSAGE COUNT=====\n"
+              << moldudp64_msg_count
               << std::endl;
-
-    delete[] moldudp64_buffer;
-    close(udp_fd);
 
     return EXIT_SUCCESS;
 }
