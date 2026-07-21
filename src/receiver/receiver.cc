@@ -1,3 +1,8 @@
+#include "receiver/message_parser.h"
+#include "receiver/limit_order_book.h"
+#include "receiver/benchmark.h"
+#include "shared/mold_udp_64.h"
+
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -7,10 +12,6 @@
 #include <cstring>
 #include "absl/container/flat_hash_map.h"
 #include <chrono>
-
-#include "receiver/message_parser.h"
-#include "receiver/limit_order_book.h"
-#include "receiver/benchmark.h"
 
 #define BUFFER_SIZE 1472
 
@@ -23,7 +24,7 @@ int main(int argc, char **argv)
     // }
     if (argc != 4)
     {
-        std::cerr << "Usage: " << argv[0] << " <multicast_ip> <port> <CPU pin\n"; // e.g., "239.0.0.1" 12345 3
+        std::cerr << "Usage: " << argv[0] << " <multicast_ip> <port> <CPU pin> \n"; // e.g., "239.0.0.1" 12345 3
         return EXIT_FAILURE;
     }
 
@@ -74,34 +75,49 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+
+    // Metrics variables
+    size_t message_count = 0;
+    size_t moldudp64_message_count = 0;
+    bench::pin_to_cpu(cpu_id);
+    double ns_per_cycle = bench::FindNsPerCycle(50);
+    
+    
     char buffer[BUFFER_SIZE];
     struct sockaddr_in sender_addr;
     socklen_t sender_len = sizeof(sender_addr);
 
-    fh_lob::LimitOrderBook lob(1000000, 500 * 100 * 10000, 10000, 300000000);
+    fh_lob::LimitOrderBook lob(2000000, 500 * 100 * 10000, 10000, 300000000);
 
-    // Metrics variables
-    size_t moldudp_messages = 0;
-    size_t total_message_count = 0;
+    ssize_t received = recvfrom(udp_fd, &buffer, BUFFER_SIZE, 0, (sockaddr *)&sender_addr, &sender_len);
+    if (received < 0)
+    {
+        perror("Receive failed");
+    }
     auto start_time = std::chrono::steady_clock::now();
-    bench::pin_to_cpu(cpu_id);
-    double ns_per_cycle = bench::FindNsPerCycle(50);
 
     while (true)
     {
-        memset(buffer, 0, BUFFER_SIZE);
-        ssize_t received = recvfrom(udp_fd, &buffer, BUFFER_SIZE, 0, (sockaddr *)&sender_addr, &sender_len);
+        fh_lob::MoldUDP64View moldudp64_packet(buffer, received);
+        if(moldudp64_packet.is_end_of_session())
+        {
+            break;
+        }
 
+        for(const fh_lob::MoldUDP64View::Message& msg : moldudp64_packet)
+        {
+            fh_lob::ParseMessage(msg.payload, lob);
+            message_count++;
+        }
+        
+        moldudp64_message_count++;
+        
+        ssize_t received = recvfrom(udp_fd, &buffer, BUFFER_SIZE, 0, (sockaddr *)&sender_addr, &sender_len);
         if (received < 0)
         {
             perror("Receive failed");
-        }
-
-        bool is_complete = fh_lob::ParseMoldUDP64(buffer, lob, total_message_count);
-        moldudp_messages++;
-
-        if (is_complete)
             break;
+        }
     }
 
     // Calculate Metrics
@@ -113,9 +129,9 @@ int main(int argc, char **argv)
     std::cout << "=====TIME TAKEN=====\n"
               << std::chrono::duration_cast<std::chrono::nanoseconds>(time_taken).count()
               << "\n=====TOTAL MESSAGE COUNT=====\n"
-              << total_message_count
+              << message_count
               << "\n=====TOTAL MOLDUDP64 MESSAGES\n"
-              << moldudp_messages
+              << moldudp64_message_count
               << std::endl;
 
     bench::HDRHistogram overall_hist;

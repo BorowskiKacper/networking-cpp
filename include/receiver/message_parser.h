@@ -104,7 +104,7 @@ namespace fh_lob
 
 #pragma pack(pop) // Restore default alignment
 
-    bool ParseSystemEvent(const char *msg_buffer);
+    void ParseSystemEvent(const char *msg_buffer);
     void ParseStockDirectory(const char *msg_buffer, LimitOrderBook &lob);
 
     void ParseAddOrder(const char *msg_buffer, LimitOrderBook &lob);
@@ -115,7 +115,6 @@ namespace fh_lob
     void ParseOrderDelete(const char *msg_buffer, LimitOrderBook &lob);
     void ParseOrderReplace(const char *msg_buffer, LimitOrderBook &lob);
 
-    // return true if last message has been detected, false otherwise
-    bool ParseMessage(const char *msg_buffer, LimitOrderBook &lob);
-    bool ParseMoldUDP64(const char *msg_buffer, LimitOrderBook &lob, size_t &total_message_count);
+    void ParseMessage(const char *msg_buffer, LimitOrderBook &lob);
+    // void ParseMoldUDP64(const char *msg_buffer, LimitOrderBook &lob, size_t &total_message_count);
 }

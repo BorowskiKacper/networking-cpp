@@ -1,9 +1,9 @@
 #include <atomic>
-#include <new>
 #include <cstddef>
 
 namespace fh_lob 
 {
+    inline constexpr std::size_t kCacheLineSize = 64;
     template <typename T, size_t capacity>
     class SPSCRingBuffer 
     {
@@ -11,12 +11,12 @@ namespace fh_lob
         static_assert(((capacity - 1) & capacity) == 0, "Capacity must be a power of two");
         static constexpr size_t mask = capacity - 1;
 
-        struct alignas(std::hardware_destructive_interference_size) ProducerBlock 
+        struct alignas(kCacheLineSize) ProducerBlock 
         {
             std::atomic<size_t> tail{0};
             size_t cached_head{0};
         };
-        struct alignas(std::hardware_destructive_interference_size) ConsumerBlock 
+        struct alignas(kCacheLineSize) ConsumerBlock 
         {
             std::atomic<size_t> head{0};
             size_t cached_tail{0};
@@ -24,7 +24,7 @@ namespace fh_lob
 
         ProducerBlock producer_;
         ConsumerBlock consumer_;
-        alignas(std::hardware_destructive_interference_size) T buffer_[capacity];
+        alignas(kCacheLineSize) T buffer_[capacity];
 
     public:
         bool push(const T& item) {
