@@ -1,9 +1,10 @@
 #pragma once
 
-#include <vector>
+#include "shared/limit_order_book.h"
+
 #include "absl/container/flat_hash_map.h"
 
-#include "shared/limit_order_book.h"
+#include <vector>
 
 namespace fh_lob
 {

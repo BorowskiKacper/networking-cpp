@@ -1,8 +1,8 @@
+#include "receiver/spsc_buffer.h"
+
 #include <atomic>
 #include <new>
 #include <cstddef>
-
-#include "receiver/spsc_buffer.h"
 
 namespace fh_lob {
     template <typename T, size_t capacity>

@@ -1,4 +1,7 @@
+#include "shared/benchmark.h"
+
 #include <arpa/inet.h>
+
 #include <cstring>
 #include <fstream>
 #include <cassert>
@@ -6,8 +9,6 @@
 #include <thread>
 #include <chrono>
 #include <algorithm>
-
-#include "receiver/benchmark.h"
 
 namespace bench
 {

@@ -1,18 +1,18 @@
 #include "shared/mold_udp_64.h"
 
 #include <unistd.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
 
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <vector>
-#include <arpa/inet.h>
 #include <cstring>
 #include <chrono> // for sleep
 #include <thread> // for sleep
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 #include <cassert>
 
 int main(int argc, char *argv[])
