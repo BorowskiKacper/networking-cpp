@@ -34,9 +34,10 @@ namespace fh_lob
         // caller should send the Finalize()'d packet, call Reset(), then retry.
         bool TryAppend(const char *payload, uint16_t length);
 
-        bool Empty() const;     // checks if anything is pending
-        const char *Finalize(); // stamps seq/count (network order), returns buffer
-        size_t size() const;    // bytes to pass to sendto()
+        bool Empty() const;                 // checks if anything is pending
+        const char *Finalize();             // stamps seq/count (network order), returns buffer
+        const char *FinalizeEndOfSession(); // Stamps the End of Session sentinel (count == 0xFFFF) and returns a header-only packet
+        size_t size() const;                // bytes to pass to sendto()
         void Reset();
 
     private:

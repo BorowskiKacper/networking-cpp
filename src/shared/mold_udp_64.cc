@@ -42,6 +42,20 @@ namespace fh_lob
         return buffer_;
     }
 
+    const char *MoldUDP64Builder::FinalizeEndOfSession()
+    {
+        // Carries the sequence number past the block just sent and clears the
+        // pending payload, leaving write_index_ at the bare header. On repeat
+        // calls message_count_ is already 0, so the packet stays byte-identical.
+        Reset();
+
+        const uint64_t net_sequence = htobe64(sequence_number_);
+        const uint16_t net_count = htons(k_end_of_session_count);
+        memcpy(buffer_ + offsetof(MoldUDP64Header, sequence_number), &net_sequence, sizeof(net_sequence));
+        memcpy(buffer_ + offsetof(MoldUDP64Header, message_count), &net_count, sizeof(net_count));
+        return buffer_;
+    }
+
     size_t MoldUDP64Builder::size() const
     {
         return write_index_;

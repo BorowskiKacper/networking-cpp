@@ -125,6 +125,22 @@ int main(int argc, char *argv[])
         moldudp64_msg_count++;
     }
 
+    constexpr size_t terminating_messages = 100;
+    const char *end_of_session = builder.FinalizeEndOfSession();
+    const size_t end_of_session_size = builder.size();
+
+    for (size_t i = 0; i < terminating_messages; i++)
+    {
+        if (sendto(udp_fd, end_of_session, end_of_session_size, 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
+        {
+            perror("Failed to send end of session message");
+            close(udp_fd);
+            return EXIT_FAILURE;
+        };
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
     munmap(const_cast<char *>(file), file_size);
     close(fd);
 
