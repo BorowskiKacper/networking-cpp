@@ -1,5 +1,5 @@
 #include "receiver/message_parser.h"
-#include "receiver/limit_order_book.h"
+#include "shared/limit_order_book.h"
 #include "receiver/benchmark.h"
 #include "shared/mold_udp_64.h"
 
@@ -8,7 +8,6 @@
 #include <unistd.h>
 
 #include <iostream>
-// #include <cstdlib>
 #include <cstring>
 #include "absl/container/flat_hash_map.h"
 #include <chrono>
@@ -17,11 +16,6 @@
 
 int main(int argc, char **argv)
 {
-    // if (argc != 3)
-    // {
-    //     std::cerr << "Usage: " << argv[0] << " <multicast_ip> <port>\n"; // e.g., "239.0.0.1" 12345
-    //     return EXIT_FAILURE;
-    // }
     if (argc != 4)
     {
         std::cerr << "Usage: " << argv[0] << " <multicast_ip> <port> <CPU pin> \n"; // e.g., "239.0.0.1" 12345 3

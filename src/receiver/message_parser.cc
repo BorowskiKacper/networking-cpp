@@ -6,7 +6,7 @@
 #include "absl/container/flat_hash_map.h"
 
 #include "receiver/message_parser.h"
-#include "receiver/limit_order_book.h"
+#include "shared/limit_order_book.h"
 #include "receiver/benchmark.h"
 
 namespace fh_lob

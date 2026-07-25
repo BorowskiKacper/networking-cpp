@@ -1,5 +1,5 @@
 #include "receiver/message_parser.h"
-#include "receiver/limit_order_book.h"
+#include "shared/limit_order_book.h"
 #include "receiver/benchmark.h"
 
 #include <sys/types.h>
