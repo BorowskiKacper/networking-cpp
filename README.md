@@ -142,6 +142,13 @@ msg_type: U
 <!-- OFFLINE METRICS_END -->
 
 <!-- ONLINE METRICS_START -->
+* Total Time (ns): 323604835644
+* MOLDUDP64 Packets sent (packets): 5746639
+* MOLDUDP64 Packets received (packets): 5745271
+* MOLDUDP64 Packet Drop Rate: 0.00023805219
+* Messages sent (msgs):268744780
+* Messages received (msgs): 268680371
+* Message Drop Rate: 0.00023966605
 <!-- ONLINE METRICS_END -->
 
 
