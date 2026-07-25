@@ -88,16 +88,15 @@ namespace bench
     {
 
         std::cout << "* Processing Time per Message (ns/msg): " << total_cycles / static_cast<double>(samples) << std::endl
-                  << "* Maximum Latency: " << std::endl
-                  << "    * Overall Histogram (ns/msg): " << std::endl
-                  << "        * p50: " << BucketToCycles(PercentileBucket(0.5)) * ns_per_cycle << std::endl
-                  << "        * p90: " << BucketToCycles(PercentileBucket(0.9)) * ns_per_cycle << std::endl
-                  << "        * p99: " << BucketToCycles(PercentileBucket(0.99)) * ns_per_cycle << std::endl
-                  << "        * p99.9: " << BucketToCycles(PercentileBucket(0.999)) * ns_per_cycle << std::endl
-                  << "        * max: " << max_cycles_seen * ns_per_cycle << std::endl
-                  << "    * total (msgs): " << samples << std::endl
-                  << "    * clipped (msgs): " << clipped << std::endl
-                  << "    * ns_per_cycle (ns/cycle): " << ns_per_cycle << std::endl;
+                  << "* total (msgs): " << samples << std::endl
+                  << "* ns_per_cycle (ns/cycle): " << ns_per_cycle << std::endl
+                  << "* HDR Histogram (ns/msg): " << std::endl
+                  << "    * p50: " << BucketToCycles(PercentileBucket(0.5)) * ns_per_cycle << std::endl
+                  << "    * p90: " << BucketToCycles(PercentileBucket(0.9)) * ns_per_cycle << std::endl
+                  << "    * p99: " << BucketToCycles(PercentileBucket(0.99)) * ns_per_cycle << std::endl
+                  << "    * p99.9: " << BucketToCycles(PercentileBucket(0.999)) * ns_per_cycle << std::endl
+                  << "    * max: " << max_cycles_seen * ns_per_cycle << std::endl
+                  << "    * clipped (msgs): " << clipped << std::endl;
     }
 
     double FindNsPerCycle(size_t ms)

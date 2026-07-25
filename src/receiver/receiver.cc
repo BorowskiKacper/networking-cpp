@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cstring>
 #include <chrono>
+#include <vector>
 
 #define BUFFER_SIZE 1472
 
@@ -100,7 +101,14 @@ int main(int argc, char **argv)
 
         for(const fh_lob::MoldUDP64View::Message& msg : moldudp64_packet)
         {
+            uint8_t msg_type = static_cast<uint8_t>(*(msg.payload));
+            uint64_t start_cycle = bench::RdtscStart();
             fh_lob::ParseMessage(msg.payload, lob);
+            uint64_t end_cycle = bench::RdtscEnd();
+
+            if (message_count > 10000) // warmup skip
+                bench::hist[msg_type].Record(end_cycle - start_cycle);
+
             message_count++;
         }
         
@@ -131,15 +139,21 @@ int main(int argc, char **argv)
     bench::HDRHistogram overall_hist;
     for (size_t i = 0; i < 256; i++)
     {
-        // std::cout << "Histogram i=" << i << " \n"
-        //           << bench::hist[i] << std::endl;
         overall_hist += bench::hist[i];
     }
-    std::cout << "Overall Histogram: \n";
+    std::cout << "#### Overall: \n";
     overall_hist.PrintSummary(ns_per_cycle);
 
     std::cout << "ns_per_cycle: " << ns_per_cycle << std::endl;
     std::cout << "Again find ns_per_cycle: " << second_ns_per_cycle << std::endl;
+
+    std::vector<uint8_t> msg_types{'S', 'R', 'A', 'F', 'E', 'C', 'X', 'D', 'U'};
+    for (uint8_t msg_type : msg_types)
+    {
+
+        std::cout << "\n#### msg_type " << msg_type << ": " << std::endl;
+        bench::hist[msg_type].PrintSummary(ns_per_cycle);
+    }
 
     overall_hist.Save("./histograms/overall_hist.txt");
 
