@@ -143,37 +143,51 @@ msg_type: U
 
 ### Online Metrics:
 <!-- ONLINE METRICS_START -->
-* Total Time (ns): 357902520217
+* Total Time (ns): 1145804717678
 * MOLDUDP64 Packets sent (packets): 5746639
 * MOLDUDP64 Packets received (packets): 5746478
-* MOLDUDP64 Packet Drop Rate: 2.801638e-05
+* MOLDUDP64 Packet Drop Rate: 0
 * Messages sent (msgs): 268744780
 * Messages received (msgs): 268737166
-* Message Drop Rate: 2.833171e-05
+* Message Drop Rate: 0
+* Ring full stalls (RX waiting on the parse thread): 0
+* Max ring depth (slots): 63
 #### Overall: 
-* Processing Time per Message (ns/msg): 346.906
-* total (msgs): 268727165
+* Processing Time per Message (ns/msg): 359.011
+* total (msgs): 268734779
 * ns_per_cycle (ns/cycle): 0.554078
 * HDR Histogram (ns/msg): 
-    * p50: 160.683
-    * p90: 374.557
-    * p99: 926.418
-    * p99.9: 1250
-    * max: 215744
+    * p50: 134.641
+    * p90: 387.854
+    * p99: 970.744
+    * p99.9: 4273.05
+    * max: 262483
+    * clipped (msgs): 0
+
+#### End to end (socket to parsed): 
+* Processing Time per Message (ns/msg): 163902
+* total (msgs): 268734779
+* ns_per_cycle (ns/cycle): 0.554078
+* HDR Histogram (ns/msg): 
+    * p50: 61560.2
+    * p90: 212198
+    * p99: 442553
+    * p99.9: 739857
+    * max: 1.90556e+06
     * clipped (msgs): 0
 ns_per_cycle: 0.554078
 Again find ns_per_cycle: 0.554078
 
 #### msg_type S: 
-* Processing Time per Message (ns/msg): 20995.6
+* Processing Time per Message (ns/msg): 28522.4
 * total (msgs): 5
 * ns_per_cycle (ns/cycle): 0.554078
 * HDR Histogram (ns/msg): 
-    * p50: 10992.9
-    * p90: 16950.4
-    * p99: 16950.4
-    * p99.9: 16950.4
-    * max: 16949.8
+    * p50: 15106.4
+    * p90: 17517.7
+    * p99: 17517.7
+    * p99.9: 17517.7
+    * max: 17485
     * clipped (msgs): 0
 
 #### msg_type R: 
@@ -189,87 +203,87 @@ Again find ns_per_cycle: 0.554078
     * clipped (msgs): 0
 
 #### msg_type A: 
-* Processing Time per Message (ns/msg): 319.805
-* total (msgs): 117142424
+* Processing Time per Message (ns/msg): 310.052
+* total (msgs): 117145568
 * ns_per_cycle (ns/cycle): 0.554078
 * HDR Histogram (ns/msg): 
-    * p50: 124.668
-    * p90: 361.259
-    * p99: 917.553
-    * p99.9: 1232.27
-    * max: 215744
+    * p50: 92.5309
+    * p90: 316.932
+    * p99: 899.822
+    * p99.9: 3918.44
+    * max: 262483
     * clipped (msgs): 0
 
 #### msg_type F: 
-* Processing Time per Message (ns/msg): 254.957
-* total (msgs): 1485703
+* Processing Time per Message (ns/msg): 252.975
+* total (msgs): 1485888
 * ns_per_cycle (ns/cycle): 0.554078
 * HDR Histogram (ns/msg): 
-    * p50: 75.9087
-    * p90: 282.58
-    * p99: 864.362
-    * p99.9: 4095.74
-    * max: 107027
+    * p50: 55.4078
+    * p90: 285.904
+    * p99: 864.361
+    * p99.9: 4166.66
+    * max: 54895.8
     * clipped (msgs): 0
 
 #### msg_type E: 
-* Processing Time per Message (ns/msg): 332.52
-* total (msgs): 5722694
+* Processing Time per Message (ns/msg): 390.824
+* total (msgs): 5722824
 * ns_per_cycle (ns/cycle): 0.554078
 * HDR Histogram (ns/msg): 
-    * p50: 109.153
-    * p90: 378.989
-    * p99: 926.418
-    * p99.9: 1214.54
-    * max: 42821.9
+    * p50: 140.182
+    * p90: 441.046
+    * p99: 1023.94
+    * p99.9: 4716.31
+    * max: 65950.2
     * clipped (msgs): 0
 
 #### msg_type C: 
-* Processing Time per Message (ns/msg): 242.118
-* total (msgs): 99916
+* Processing Time per Message (ns/msg): 242.099
+* total (msgs): 99917
 * ns_per_cycle (ns/cycle): 0.554078
 * HDR Histogram (ns/msg): 
-    * p50: 37.1232
-    * p90: 321.365
-    * p99: 882.092
-    * p99.9: 1196.81
-    * max: 14801.6
+    * p50: 46.5425
+    * p90: 339.095
+    * p99: 926.418
+    * p99.9: 1710.99
+    * max: 15233.3
     * clipped (msgs): 0
 
 #### msg_type X: 
-* Processing Time per Message (ns/msg): 253.966
-* total (msgs): 2787403
+* Processing Time per Message (ns/msg): 237.957
+* total (msgs): 2787676
 * ns_per_cycle (ns/cycle): 0.554078
 * HDR Histogram (ns/msg): 
-    * p50: 49.867
-    * p90: 321.365
-    * p99: 882.092
-    * p99.9: 1143.62
-    * max: 35910.3
+    * p50: 46.5425
+    * p90: 330.23
+    * p99: 908.687
+    * p99.9: 1710.99
+    * max: 99978.3
     * clipped (msgs): 0
 
 #### msg_type D: 
-* Processing Time per Message (ns/msg): 376.368
-* total (msgs): 114357794
+* Processing Time per Message (ns/msg): 401.95
+* total (msgs): 114360997
 * ns_per_cycle (ns/cycle): 0.554078
 * HDR Histogram (ns/msg): 
-    * p50: 185.062
-    * p90: 378.989
-    * p99: 926.418
-    * p99.9: 1196.81
-    * max: 155252
+    * p50: 160.682
+    * p90: 410.017
+    * p99: 997.34
+    * p99.9: 4716.31
+    * max: 154292
     * clipped (msgs): 0
 
 #### msg_type U: 
-* Processing Time per Message (ns/msg): 444.118
-* total (msgs): 21638449
+* Processing Time per Message (ns/msg): 497.471
+* total (msgs): 21639067
 * ns_per_cycle (ns/cycle): 0.554078
 * HDR Histogram (ns/msg): 
-    * p50: 205.009
-    * p90: 467.642
-    * p99: 1006.21
-    * p99.9: 1604.61
-    * max: 84537.9
+    * p50: 229.388
+    * p90: 489.805
+    * p99: 1050.53
+    * p99.9: 6063.82
+    * max: 181212
     * clipped (msgs): 0
 <!-- ONLINE METRICS_END -->
 

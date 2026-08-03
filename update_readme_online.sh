@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# usage: ./build/apps/receiver 239.0.0.1 12345 3 2>&1 | ./update_readme_online.sh
+# usage: ./build/apps/receiver 239.0.0.1 12345 2 3 2>&1 | ./update_readme_online.sh
 #    or: ./update_readme_online.sh < receiver_output.txt
 #
 # Start the sender in another terminal: ./build/apps/sender 239.0.0.1 12345
@@ -34,10 +34,14 @@ require_count() {
 time_ns="$(read_after_banner '=====TIME TAKEN=====')"
 messages_received="$(read_after_banner '=====TOTAL MESSAGE COUNT=====')"
 packets_received="$(read_after_banner '=====TOTAL MOLDUDP64 MESSAGES')"
+ring_full_stalls="$(read_after_banner '=====RING FULL STALLS=====')"
+max_ring_depth="$(read_after_banner '=====MAX RING DEPTH=====')"
 
 require_count "$time_ns" "no '=====TIME TAKEN=====' value in the receiver output (did it exit normally?)"
 require_count "$messages_received" "no '=====TOTAL MESSAGE COUNT=====' value in the receiver output"
 require_count "$packets_received" "no '=====TOTAL MOLDUDP64 MESSAGES' value in the receiver output"
+require_count "$ring_full_stalls" "no '=====RING FULL STALLS=====' value in the receiver output"
+require_count "$max_ring_depth" "no '=====MAX RING DEPTH=====' value in the receiver output"
 
 # read the sent counts back out of the ONLINE block, before we overwrite it
 readme_field() {
@@ -82,6 +86,8 @@ metrics="$(
 * Messages sent (msgs): $messages_sent
 * Messages received (msgs): $messages_received
 * Message Drop Rate: $message_drop_rate
+* Ring full stalls (RX waiting on the parse thread): $ring_full_stalls
+* Max ring depth (slots): $max_ring_depth
 $histograms
 EOF
 )"

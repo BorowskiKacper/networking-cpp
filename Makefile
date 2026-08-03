@@ -1,6 +1,6 @@
 CXX      := g++
-CXXFLAGS := -std=c++20 -pedantic-errors -Wall -Wextra -Werror $(shell pkg-config --cflags absl_flat_hash_map)
-LDFLAGS  := -L/usr/lib -lstdc++ -lm $(shell pkg-config --libs absl_flat_hash_map)
+CXXFLAGS := -std=c++20 -pedantic-errors -Wall -Wextra -Wshadow -Werror $(shell pkg-config --cflags absl_flat_hash_map)
+LDFLAGS  := -L/usr/lib -lstdc++ -lm -lpthread $(shell pkg-config --libs absl_flat_hash_map)
 BUILD    := ./build
 OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps
@@ -23,8 +23,9 @@ SENDER_DEPS      := $(SENDER_OBJECTS:.o=.d)
 OFFLINE_LOB_TARGET 	:= offline
 OFFLINE_LOB_SRC		:= 					  \
 	$(wildcard src/offline/*.cc)		  \
-	src/receiver/benchmark.cc			  \
-	src/receiver/limit_order_book.cc	  \
+	src/shared/benchmark.cc				  \
+	src/shared/limit_order_book.cc		  \
+	src/shared/mold_udp_64.cc			  \
 	src/receiver/message_parser.cc
 OFFLINE_LOB_OBJECTS := $(OFFLINE_LOB_SRC:%.cc=$(OBJ_DIR)/%.o)
 OFFLINE_LOB_DEPS    := $(OFFLINE_LOB_OBJECTS:.o=.d)
@@ -109,6 +110,24 @@ offline-clean:
 	-@rm -f $(OFFLINE_LOB_OBJECTS) $(OFFLINE_LOB_DEPS)
 	-@rm -f $(APP_DIR)/$(OFFLINE_LOB_TARGET)
 
+# Tests (not part of `all`)
+# The ring is header-only, so these compile straight from the test source.
+# TSan gets its own binary: it cannot be combined with the release flags.
+spsc-test:
+	@mkdir -p $(APP_DIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -O2 -march=native -o $(APP_DIR)/spsc_test tests/spsc_test.cc -lpthread
+
+spsc-test-tsan:
+	@mkdir -p $(APP_DIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -O1 -g -fsanitize=thread -o $(APP_DIR)/spsc_test_tsan tests/spsc_test.cc -lpthread
+
+test: spsc-test spsc-test-tsan
+	$(APP_DIR)/spsc_test 5000000
+	$(APP_DIR)/spsc_test_tsan 300000
+
+test-clean:
+	-@rm -f $(APP_DIR)/spsc_test $(APP_DIR)/spsc_test_tsan
+
 # Global
 clean:
 	-@rm -rvf $(OBJ_DIR)/* $(APP_DIR)/*
@@ -116,4 +135,5 @@ clean:
 .PHONY: all clean                                                       \
         receiver receiver-debug receiver-release receiver-info receiver-clean \
         sender   sender-debug   sender-release   sender-info   sender-clean	  \
-		offline  offline-debug  offline-release  offline-info  offline-clean
+		offline  offline-debug  offline-release  offline-info  offline-clean	  \
+		test     spsc-test      spsc-test-tsan   test-clean
