@@ -1,4 +1,4 @@
-#include "receiver/message_parser.h"
+#include "shared/message_parser.h"
 #include "receiver/spsc_buffer.h"
 #include "shared/limit_order_book.h"
 #include "shared/benchmark.h"
@@ -33,8 +33,8 @@ namespace
 
     struct alignas(fh_lob::kCacheLineSize) PacketSlot
     {
-        uint64_t rx_tsc;    // stamped by the RX thread as the packet leaves the socket
-        uint32_t length;    // bytes actually received
+        uint64_t rx_tsc; // stamped by the RX thread as the packet leaves the socket
+        uint32_t length; // bytes actually received
         char data[kMaxPacketSize];
     };
 
