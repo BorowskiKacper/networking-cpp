@@ -11,7 +11,6 @@
 #include <arpa/inet.h>
 
 #include <iostream>
-#include <cstring>
 #include <chrono>
 #include <vector>
 
@@ -24,7 +23,7 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
     }
 
     int cpu_id = atoi(argv[1]);
-    string itch_messages_file = argv[2];
+    const char *itch_messages_file = argv[2];
 
     int fd = open(itch_messages_file, O_RDONLY, S_IRUSR | S_IWUSR);
     struct stat sb;

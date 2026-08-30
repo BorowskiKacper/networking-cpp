@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     }
 
     // mmap setup
-    string itch_messages_file = argv[3];
+    const char *itch_messages_file = argv[3];
     int fd = open(itch_messages_file, O_RDONLY, S_IRUSR | S_IWUSR);
     struct stat sb;
 
