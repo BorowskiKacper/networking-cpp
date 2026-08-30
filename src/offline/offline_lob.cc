@@ -11,21 +11,21 @@
 #include <arpa/inet.h>
 
 #include <iostream>
-#include <cstring>
 #include <chrono>
 #include <vector>
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 {
-    if (argc != 2)
+    if (argc != 3)
     {
-        std::cerr << "Usage: " << argv[0] << " <CPU pin> \n";
+        std::cerr << "Usage: " << argv[0] << " <CPU pin> <itch_messages_file> \n";
         return EXIT_FAILURE;
     }
 
     int cpu_id = atoi(argv[1]);
+    const char *itch_messages_file = argv[2];
 
-    int fd = open("itchmessages/12302019.NASDAQ_ITCH50", O_RDONLY, S_IRUSR | S_IWUSR);
+    int fd = open(itch_messages_file, O_RDONLY, S_IRUSR | S_IWUSR);
     struct stat sb;
 
     if (fstat(fd, &sb) == -1)

@@ -17,9 +17,9 @@
 
 int main(int argc, char *argv[])
 {
-    if (argc != 3)
+    if (argc != 4)
     {
-        std::cerr << "Usage: " << argv[0] << " <multicast_ip> <port>\n"; // e.g., "239.0.0.1" 12345
+        std::cerr << "Usage: " << argv[0] << " <multicast_ip> <port> <itch_messages_file> \n"; // e.g., "239.0.0.1" 12345 "itchmessages/12302019.NASDAQ_ITCH50"
         return EXIT_FAILURE;
     }
 
@@ -53,7 +53,8 @@ int main(int argc, char *argv[])
     }
 
     // mmap setup
-    int fd = open("itchmessages/12302019.NASDAQ_ITCH50", O_RDONLY, S_IRUSR | S_IWUSR);
+    const char *itch_messages_file = argv[3];
+    int fd = open(itch_messages_file, O_RDONLY, S_IRUSR | S_IWUSR);
     struct stat sb;
 
     if (fstat(fd, &sb) == -1)
@@ -77,12 +78,12 @@ int main(int argc, char *argv[])
         perror("madvise");
     }
 
-    // send    
+    // send
     const std::string session = "Session123";
     fh_lob::MoldUDP64Builder builder(session, 1);
-    const char* cursor = file;
-    const char* file_end = file + file_size;
-    
+    const char *cursor = file;
+    const char *file_end = file + file_size;
+
     size_t msg_count = 0;
     size_t moldudp64_msg_count = 0;
     auto start_time = std::chrono::steady_clock::now();
@@ -93,9 +94,9 @@ int main(int argc, char *argv[])
         memcpy(&net_length, cursor, sizeof(net_length));
         const uint16_t length = ntohs(net_length);
         assert(length < fh_lob::MoldUDP64Builder::k_max_packet_size);
-        const char* payload = cursor + sizeof(uint16_t);
+        const char *payload = cursor + sizeof(uint16_t);
 
-        if(!builder.TryAppend(payload, length))
+        if (!builder.TryAppend(payload, length))
         {
             if (sendto(udp_fd, builder.Finalize(), builder.size(), 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
             {
@@ -108,12 +109,12 @@ int main(int argc, char *argv[])
 
             moldudp64_msg_count++;
         }
-        
+
         msg_count++;
         cursor = payload + length;
     }
 
-    if(!builder.Empty()) 
+    if (!builder.Empty())
     {
         if (sendto(udp_fd, builder.Finalize(), builder.size(), 0, (struct sockaddr *)&multicast_addr, sizeof(multicast_addr)) < 0)
         {
@@ -121,7 +122,7 @@ int main(int argc, char *argv[])
             close(udp_fd);
             return EXIT_FAILURE;
         };
-        
+
         moldudp64_msg_count++;
     }
 
