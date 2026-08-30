@@ -49,8 +49,6 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
         perror("madvise");
     }
 
-    uint16_t msg_length;
-
     fh_lob::LimitOrderBook lob(2000000, 500 * 100 * 10000, 10000, 300000000);
 
     // Metrics variables
@@ -59,25 +57,26 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
     bench::pin_to_cpu(cpu_id);
     double ns_per_cycle = bench::FindNsPerCycle(50);
 
-    size_t i = 0;
-    while (true)
-    {
-        memcpy(&msg_length, file + i, sizeof(msg_length));
-        uint16_t host_msg_length = ntohs(msg_length);
-        i += sizeof(msg_length);
+    const char *cursor = file;
+    const char *file_end = file + file_size;
 
-        uint8_t msg_type = static_cast<uint8_t>(*(file + i));
+    while (cursor + sizeof(uint16_t) <= file_end)
+    {
+        uint16_t net_length;
+        memcpy(&net_length, cursor, sizeof(net_length));
+        const uint16_t length = ntohs(net_length);
+        const char *payload = cursor + sizeof(uint16_t);
+
+        uint8_t msg_type = static_cast<uint8_t>(*payload);
         uint64_t start_cycle = bench::RdtscStart();
-        bool is_complete = fh_lob::ParseMessage(file + i, lob);
+        fh_lob::ParseMessage(payload, lob);
         uint64_t end_cycle = bench::RdtscEnd();
-        i += host_msg_length;
 
         if (total_message_count > 10000) // warmup skip
             bench::hist[msg_type].Record(end_cycle - start_cycle);
         total_message_count++;
 
-        if (is_complete)
-            break;
+        cursor = payload + length;
     }
 
     // Calculate Metrics
