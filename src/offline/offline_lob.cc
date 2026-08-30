@@ -92,9 +92,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
               << "    * Total Messages (msgs): " << total_message_count << std::endl;
 
     bench::HDRHistogram overall_hist;
-    for (size_t i = 0; i < 256; i++)
+    for (size_t index = 0; index < 256; index++)
     {
-        overall_hist += bench::hist[i];
+        overall_hist += bench::hist[index];
     }
     overall_hist.PrintSummary(ns_per_cycle);
 
