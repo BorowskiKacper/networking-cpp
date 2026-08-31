@@ -142,38 +142,8 @@ namespace fh_lob
             break;
         default:
         {
-        }
             // Ignore non-LOB messages silently
         }
+        }
     }
-
-    // bool ParseMoldUDP64(const char *msg_buffer, LimitOrderBook &lob, size_t &total_message_count)
-    // {
-    //     uint64_t sequence_number;
-    //     uint16_t message_count;
-    //     memcpy(&sequence_number, msg_buffer + 10, sizeof(sequence_number));
-    //     memcpy(&message_count, msg_buffer + 18, sizeof(message_count));
-    //     sequence_number = be64toh(sequence_number);
-    //     message_count = ntohs(message_count);
-
-    //     uint16_t message_length;
-    //     for (size_t i = 20; message_count > 0; message_count--, i += 2 + message_length)
-    //     {
-    //         memcpy(&message_length, msg_buffer + i, sizeof(message_length));
-    //         message_length = ntohs(message_length);
-
-    //         uint8_t msg_type = static_cast<uint8_t>(msg_buffer[i + 2]);
-    //         uint64_t start_cycle = bench::RdtscStart();
-    //         bool is_complete = ParseMessage(msg_buffer + i + 2, lob);
-    //         uint64_t end_cycle = bench::RdtscEnd();
-    //         if (total_message_count > 10000) // warmup skip
-    //             bench::hist[msg_type].Record(end_cycle - start_cycle);
-    //         total_message_count++;
-
-    //         if (is_complete)
-    //             return true;
-    //     }
-
-    //     return false;
-    // }
 }

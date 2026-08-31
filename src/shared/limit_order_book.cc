@@ -32,7 +32,6 @@ namespace fh_lob
         Order *order = order_pool.get(order_index);
         order->side = side;
         order->shares = shares;
-        // order->price = price;
 
         order->next = MemoryPool<Order>::NIL;
         order->prev = MemoryPool<Order>::NIL;
@@ -53,7 +52,7 @@ namespace fh_lob
         }
         else
         {
-            level_index = price_level_map[price];
+            level_index = it->second;
             level = price_level_pool.get(level_index);
             level->total_volume += shares;
         }
