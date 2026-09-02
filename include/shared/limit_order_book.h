@@ -87,7 +87,7 @@ namespace fh_lob
         void ReduceOrderSize(uint64_t id, uint32_t shares);
 
     public:
-        // Pre-allocates every buffer the book will ever use; nothing here grows on demand except price_level_maps/locate_to_str (see MapStockStr). All four arguments are capacities, not objects -- note that the first two parameters shadow the members they initialize.
+        // Pre-allocates every buffer the book will ever use; nothing here grows on demand except price_level_maps/locate_to_str (see MapStockStr). All arguments are capacities, not objects -- note that the first two parameters shadow the members they initialize.
         //
         // order_pool_capacity:
         //     Max number of *live* orders at any instant. A slot is taken by AddOrder and returned by DeleteOrder (and by ReduceOrderSize once shares hit 0), so this only needs to cover peak concurrent open orders, not the day's total. Overflow throws std::runtime_error("pool exhausted") from MemoryPool::allocate_index.
@@ -104,12 +104,18 @@ namespace fh_lob
         //     One past the largest order reference number the feed will use. `orders` is a flat direct-lookup table of this size, indexed by order_ref_number with no bounds check, so anything >= this value is an out-of-bounds read/write. ITCH refs are 64-bit and increase monotonically through the day, so this is effectively "message volume for the session, rounded up".
         //     Cost: 4 B per entry, zero-initialized up front.
         //
+        // expected_levels_per_locate:
+        //     Reserve hint for each per-locate price level map. Reserving pre-commits the backing arrays so that the typical symbol doesn't rehash; a symbol exceeding the hint still grows normally, just later and less often.
+        //     Cost: ~9 B per slot (8 B key+value, 1 B control), slots rounded up to a power of two >= hint/0.875, paid per locate. Default 256 -> ~4.6 KB per map, ~46 MB at 10'000 locates.
+        //
         // Both pool capacities are narrowed to uint32_t by MemoryPool's constructor.
         //
         // Example: LimitOrderBook lob(2'000'000, 500 * 100 * 10'000, 10'000, 300'000'000);
-        LimitOrderBook(size_t order_pool_capacity, size_t price_level_pool_capacity, size_t max_locates, size_t max_order_ref_number) : order_pool(order_pool_capacity), price_level_pool(price_level_pool_capacity)
+        LimitOrderBook(size_t order_pool_capacity, size_t price_level_pool_capacity, size_t max_locates, size_t max_order_ref_number, size_t expected_levels_per_locate = 256) : order_pool(order_pool_capacity), price_level_pool(price_level_pool_capacity)
         {
             price_level_maps.resize(max_locates);
+            for (absl::flat_hash_map<uint32_t, uint32_t> &price_level_map : price_level_maps)
+                price_level_map.reserve(expected_levels_per_locate);
             locate_to_str.resize(max_locates);
             str_to_locate.reserve(max_locates);
             orders.resize(max_order_ref_number, MemoryPool<Order>::NIL);
