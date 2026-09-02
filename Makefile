@@ -23,10 +23,7 @@ SENDER_DEPS      := $(SENDER_OBJECTS:.o=.d)
 OFFLINE_LOB_TARGET 	:= offline
 OFFLINE_LOB_SRC		:= 					  \
 	$(wildcard src/offline/*.cc)		  \
-	src/shared/benchmark.cc				  \
-	src/shared/limit_order_book.cc		  \
-	src/shared/mold_udp_64.cc			  \
-	src/receiver/message_parser.cc
+	$(wildcard src/shared/*.cc)
 OFFLINE_LOB_OBJECTS := $(OFFLINE_LOB_SRC:%.cc=$(OBJ_DIR)/%.o)
 OFFLINE_LOB_DEPS    := $(OFFLINE_LOB_OBJECTS:.o=.d)
 
