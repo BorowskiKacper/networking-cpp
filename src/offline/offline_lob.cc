@@ -51,14 +51,15 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 
     fh_lob::LimitOrderBook lob(2000000, 500 * 100 * 10000, 10000, 300000000);
 
-    // Metrics variables
-    size_t total_message_count = 0;
-    auto start_time = std::chrono::steady_clock::now();
     bench::pin_to_cpu(cpu_id);
     double ns_per_cycle = bench::FindNsPerCycle(50);
 
     const char *cursor = file;
     const char *file_end = file + file_size;
+
+    // Metrics variables
+    size_t total_message_count = 0;
+    auto start_time = std::chrono::steady_clock::now();
 
     while (cursor + sizeof(uint16_t) <= file_end)
     {

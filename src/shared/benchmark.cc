@@ -49,7 +49,8 @@ namespace bench
             }
         }
 
-        return -1;
+        // Only reachable when clipped samples (which live in no bucket) push the target count past everything recorded in-range
+        return TOP_BUCKETS * SUB_BUCKETS - 1;
     }
 
     HDRHistogram &HDRHistogram::operator+=(const HDRHistogram &other)
@@ -116,15 +117,12 @@ namespace bench
             clock_gettime(CLOCK_MONOTONIC_RAW, &ts_end);
             uint64_t end_cycles = RdtscEnd();
 
-            slopes[i] = static_cast<double>(ts_end.tv_nsec - ts_start.tv_nsec) / (end_cycles - start_cycles);
+            const double elapsed_ns = static_cast<double>(ts_end.tv_sec - ts_start.tv_sec) * 1e9 +
+                                      static_cast<double>(ts_end.tv_nsec - ts_start.tv_nsec);
+            slopes[i] = elapsed_ns / static_cast<double>(end_cycles - start_cycles);
         }
 
         std::sort(slopes, slopes + 5);
-        std::cout << "Test slopes" << std::endl; // remove test
-        for (int i = 0; i < 5; i++)
-        {
-            std::cout << "\tSlope " << i << ": " << slopes[i] << std::endl;
-        } // remove till here
 
         return slopes[2];
     }

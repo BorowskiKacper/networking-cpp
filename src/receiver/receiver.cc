@@ -81,7 +81,7 @@ namespace
     {
         std::chrono::steady_clock::time_point start_time;
         size_t packets = 0;
-        size_t ring_full_stalls = 0;
+        size_t ring_full_stalls = 0; // number of times the ring went from having space to being full
         size_t max_depth = 0;
     };
 
@@ -103,6 +103,7 @@ namespace
         }
 
         bool started = false;
+        bool stalled = false;
         size_t spins = 0;
 
         while (!done.load(std::memory_order_acquire))
@@ -113,10 +114,15 @@ namespace
             if (claimed == 0)
             {
                 // Consumer is behind. Stalling rather than dropping hands the backlog down to the socket buffer, which is sized for it.
-                stats.ring_full_stalls++;
+                if (!stalled)
+                {
+                    stats.ring_full_stalls++;
+                    stalled = true;
+                }
                 Backoff(spins);
                 continue;
             }
+            stalled = false;
 
             const int count = recvmmsg(udp_fd, &headers[index], claimed, MSG_DONTWAIT, nullptr);
             if (count <= 0)

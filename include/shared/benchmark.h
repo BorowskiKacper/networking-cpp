@@ -15,8 +15,7 @@ namespace bench
         uint64_t buckets[TOP_BUCKETS * SUB_BUCKETS]{};
         uint64_t samples = 0, total_cycles = 0, clipped = 0, max_cycles_seen = 0;
 
-        // percentile p must be between 0 and 1.
-        // Returns the index of a bucket corresponding to the percentile if found, otherwise returns -1.
+        // Percentile p must be between 0 and 1. Returns the index of the bucket corresponding to the percentile. If clipped samples push the percentile beyond the histogram's range, returns the last bucket index.
         uint64_t PercentileBucket(double p) const;
 
     public:
