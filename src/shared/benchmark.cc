@@ -87,7 +87,7 @@ namespace bench
     void HDRHistogram::PrintSummary(double ns_per_cycle)
     {
 
-        std::cout << "* Processing Time per Message (ns/msg): " << total_cycles / static_cast<double>(samples) << std::endl
+        std::cout << "* Processing Time per Message (ns/msg): " << total_cycles * ns_per_cycle / static_cast<double>(samples) << std::endl
                   << "* total (msgs): " << samples << std::endl
                   << "* ns_per_cycle (ns/cycle): " << ns_per_cycle << std::endl
                   << "* HDR Histogram (ns/msg): " << std::endl
