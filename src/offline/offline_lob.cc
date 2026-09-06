@@ -80,6 +80,9 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
         cursor = payload + length;
     }
 
+    munmap(const_cast<char *>(file), file_size);
+    close(fd);
+
     // Calculate Metrics
     auto end_time = std::chrono::steady_clock::now();
     auto time_taken = end_time - start_time;
