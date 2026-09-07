@@ -2,5 +2,6 @@ a.out
 itchmessages/
 build
 histograms
+results/
 perf.*
 output.txt

@@ -6,6 +6,12 @@ OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps
 INCLUDE  := -Iinclude/
 
+# Build provenance, stamped into every run document so a result can be traced back to the exact source and flags that produced it. PROVENANCE is recursively expanded on purpose: it is evaluated inside the compile recipe, where the target-specific CXXFLAGS additions (-O3, -flto, ...) are in effect.
+GIT_SHA      := $(shell git rev-parse --short=8 HEAD 2>/dev/null || echo unknown)
+GIT_DIRTY    := $(shell git status --porcelain 2>/dev/null | head -c 1 | wc -c)
+BUILD_CONFIG := dev
+PROVENANCE    = -DBENCH_GIT_SHA='"$(GIT_SHA)"' -DBENCH_GIT_DIRTY=$(GIT_DIRTY) -DBENCH_BUILD_CONFIG='"$(BUILD_CONFIG)"' -DBENCH_CXXFLAGS='"$(CXXFLAGS)"'
+
 RECEIVER_TARGET  := receiver
 RECEIVER_SRC     :=                       \
    $(wildcard src/receiver/*.cc)          \
@@ -31,7 +37,11 @@ all: receiver sender offline
 
 $(OBJ_DIR)/%.o: %.cc
 	@mkdir -p $(@D)
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -c $< -MMD -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDE) $(PROVENANCE) -c $< -MMD -o $@
+
+# The commit and the flags are compiled into this one object, and make has no way to know they changed, so it is rebuilt unconditionally. It is a single small translation unit.
+$(OBJ_DIR)/src/shared/run_result.o: FORCE
+FORCE:
 
 receiver: $(APP_DIR)/$(RECEIVER_TARGET)
 sender:   $(APP_DIR)/$(SENDER_TARGET)
@@ -54,9 +64,11 @@ $(APP_DIR)/$(OFFLINE_LOB_TARGET): $(OFFLINE_LOB_OBJECTS)
 -include $(OFFLINE_LOB_DEPS)
 
 # Receiver commands
+receiver-debug:   BUILD_CONFIG := debug
 receiver-debug:   CXXFLAGS += -DDEBUG -g -O0
 receiver-debug:   receiver
 
+receiver-release: BUILD_CONFIG := release
 receiver-release: CXXFLAGS += -O3 -march=native -mtune=native -flto -DNDEBUG
 receiver-release: LDFLAGS  += -flto
 receiver-release: receiver
@@ -72,9 +84,11 @@ receiver-clean:
 	-@rm -f $(APP_DIR)/$(RECEIVER_TARGET)
 
 # Sender commands
+sender-debug:     BUILD_CONFIG := debug
 sender-debug:     CXXFLAGS += -DDEBUG -g -O0
 sender-debug:     sender
 
+sender-release:   BUILD_CONFIG := release
 sender-release:   CXXFLAGS += -O3 -march=native -mtune=native -flto -DNDEBUG
 sender-release:   LDFLAGS  += -flto
 sender-release:   sender
@@ -90,9 +104,11 @@ sender-clean:
 	-@rm -f $(APP_DIR)/$(SENDER_TARGET)
 
 # Offline commands
+offline-debug:     BUILD_CONFIG := debug
 offline-debug:     CXXFLAGS += -DDEBUG -g -O0
 offline-debug:     offline
 
+offline-release:   BUILD_CONFIG := release
 offline-release:   CXXFLAGS += -O2 -march=native -mtune=native -flto -DNDEBUG
 offline-release:   LDFLAGS  += -flto
 offline-release:   offline
@@ -129,7 +145,7 @@ test-clean:
 clean:
 	-@rm -rvf $(OBJ_DIR)/* $(APP_DIR)/*
 
-.PHONY: all clean                                                       \
+.PHONY: all clean FORCE                                                       \
         receiver receiver-debug receiver-release receiver-info receiver-clean \
         sender   sender-debug   sender-release   sender-info   sender-clean	  \
 		offline  offline-debug  offline-release  offline-info  offline-clean	  \
