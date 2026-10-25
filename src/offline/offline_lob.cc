@@ -97,6 +97,9 @@ namespace
         size_t total_message_count = 0;
         auto start_time = std::chrono::steady_clock::now();
 
+        // Set when the book cannot hold the feed (e.g. an order ref past lob.max_order_ref_number); the run is then recorded as failed, with the metrics gathered up to that point.
+        std::string replay_error;
+
         try
         {
             while (cursor + sizeof(uint16_t) <= file_end)
@@ -120,15 +123,17 @@ namespace
         }
         catch (const std::exception &e)
         {
-            result.Fail("replay aborted at message " + std::to_string(total_message_count) + ": " + e.what());
-            munmap(const_cast<char *>(file), file_size);
-            close(fd);
-            return EXIT_FAILURE;
+            replay_error = "replay aborted at message " + std::to_string(total_message_count) + ": " + e.what();
         }
 
         // Calculate Metrics
         auto end_time = std::chrono::steady_clock::now();
         auto time_taken = end_time - start_time;
+
+        // A failed replay stops partway through the file, so its byte throughput is measured against what it got through, not the whole file.
+        const size_t bytes_replayed = replay_error.empty() ? file_size : static_cast<size_t>(cursor - file);
+        if (!replay_error.empty())
+            result.Fail(replay_error);
 
         munmap(const_cast<char *>(file), file_size);
         close(fd);
@@ -150,7 +155,7 @@ namespace
         result.metrics().AddUInt("recorded_messages", overall_hist.Samples(), "messages whose latency was recorded");
         result.metrics().AddInt("elapsed_ns", elapsed_ns, "wall time of the replay loop");
         result.metrics().AddDouble("throughput_msgs_s", static_cast<double>(total_message_count) / elapsed.count());
-        result.metrics().AddDouble("throughput_bytes_s", static_cast<double>(file_size) / elapsed.count());
+        result.metrics().AddDouble("throughput_bytes_s", static_cast<double>(bytes_replayed) / elapsed.count());
 
         result.AddHistogram("overall", overall_hist);
         result.AddMessageTypeHistograms(bench::hist);
@@ -165,7 +170,7 @@ namespace
                       << (second_ns_per_cycle - ns_per_cycle) / ns_per_cycle << std::endl;
         }
 
-        return EXIT_SUCCESS;
+        return replay_error.empty() ? EXIT_SUCCESS : EXIT_FAILURE;
     }
 }
 
