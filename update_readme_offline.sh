@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
-# usage: ./update_readme.sh < output.txt
-#    or: ./build/apps/offline 5 2>&1 | ./update_readme.sh
+# usage: ./update_readme_offline.sh results/bench=offline_lob/date=2026-09-06/<run_id>.json
+#
+# The offline replay writes its numbers to a run document (docs/RESULTS.md); this only renders one into the README block. Nothing here parses program output.
 set -euo pipefail
 
 README="README.md"
+PYTHON="${PYTHON:-python3}"
 
-input="$(cat)"
+if [[ $# -ne 1 ]]; then
+    echo "usage: $0 <offline run document>.json" >&2
+    exit 2
+fi
 
-# extract from first "* Throughput" line through the last "* ns_per_cycle (ns/cycle):" line
-metrics="$(printf '%s\n' "$input" | awk '
-    /^\* Throughput/                     { capture=1 }
-    capture                              { buf = buf $0 "\n" }
-    /^    \* ns_per_cycle \(ns\/cycle\):/ { end = buf }
-    END { printf "%s", end }
-')"
+result="$1"
+[[ -f "$result" ]] || { echo "$0: no such run document: $result" >&2; exit 2; }
+
+metrics="$("$PYTHON" tools/report.py markdown "$result")"
 
 # swap the new metrics in between the two markers, leaving the rest of the README unchanged
 awk -v m="$metrics" '
@@ -22,4 +24,4 @@ awk -v m="$metrics" '
     !skip
 ' "$README" > README.tmp && mv README.tmp "$README"
 
-echo "README.md updated."
+echo "README.md updated from $result"

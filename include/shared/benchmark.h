@@ -2,17 +2,21 @@
 
 #include <arpa/inet.h>
 
+#include <cstdint>
 #include <cstring>
-#include <fstream>
+#include <string>
 
 namespace bench
 {
     class HDRHistogram
     {
-    private:
+    public:
         static constexpr uint32_t TOP_BUCKETS = 32;
         static constexpr uint32_t SUB_BUCKETS = 64;
-        uint64_t buckets[TOP_BUCKETS * SUB_BUCKETS]{};
+        static constexpr uint32_t BUCKET_COUNT = TOP_BUCKETS * SUB_BUCKETS;
+
+    private:
+        uint64_t buckets[BUCKET_COUNT]{};
         uint64_t samples = 0, total_cycles = 0, clipped = 0, max_cycles_seen = 0;
 
         // Percentile p must be between 0 and 1. Returns the index of the bucket corresponding to the percentile. If clipped samples push the percentile beyond the histogram's range, returns the last bucket index.
@@ -30,7 +34,7 @@ namespace bench
             uint64_t top_bucket = bit_position < 6 ? 0 : bit_position - 5;
             uint64_t bucket = (top_bucket << 6) | sub_bucket;
 
-            if (bucket < TOP_BUCKETS * SUB_BUCKETS)
+            if (bucket < BUCKET_COUNT)
                 buckets[bucket]++;
             else
                 clipped++;
@@ -39,20 +43,25 @@ namespace bench
                 max_cycles_seen = cycles;
         }
 
-        // Stores HDRHistogram in the specified file
-        // File structure:
-        //  First line specifies the number of top buckets and sub buckets
-        //  Lines 2 to TOP_BUCKET*SUB_BUCKETS + 1 (inclusive) record the number in each bucket
-        //  Last 4 lines (starting at line TOP_BUCKET*SUB_BUCKETS + 2) record samples, total_cycles, clipped, and max_cycles_seen respectively
-        void Save(std::string file_name);
-
         HDRHistogram &operator+=(const HDRHistogram &other);
 
-        // Prints samples, mean, p50, p90, p99, p99.9, max, clipped in ns.
-        void PrintSummary(double ns_per_cycle);
+        // Writes samples, mean, p50, p90, p99, p99.9, max and clipped to stderr, in ns.
+        void PrintSummary(double ns_per_cycle) const;
 
         // Returns mid-bucket cycle value given the bucket
         uint64_t BucketToCycles(uint64_t bucket) const;
+
+        // Mid-bucket cycle value at percentile p (0..1).
+        uint64_t PercentileCycles(double p) const;
+
+        uint64_t Samples() const { return samples; }
+        uint64_t TotalCycles() const { return total_cycles; }
+        uint64_t Clipped() const { return clipped; }
+        uint64_t MaxCycles() const { return max_cycles_seen; }
+        bool Empty() const { return samples == 0 && clipped == 0; }
+
+        // Raw counts, so a run result can carry the histogram itself rather than a handful of percentiles distilled from it.
+        const uint64_t *Buckets() const { return buckets; }
     };
 
     inline uint64_t RdtscStart()

@@ -278,6 +278,22 @@ Again find ns_per_cycle: 0.554078
 <!-- ONLINE METRICS_END -->
 
 
+## Running the benchmarks
+
+Every run writes one self-contained JSON document -- build provenance, host description,
+the full configuration, the metrics and the raw histogram buckets -- rather than printing
+numbers to be parsed back. See [docs/RESULTS.md](docs/RESULTS.md) for the schema, the
+`results/` layout, and `tools/report.py`.
+
+```sh
+make clean && make offline-release
+./build/apps/offline --input=itchmessages/12302019.NASDAQ_ITCH50 --cpu=3
+tools/report.py summary "results/**/*.json"
+```
+
+The metric blocks above are rendered from those documents by `./update_readme_offline.sh`
+and `./update_readme_online.sh`, not typed by hand.
+
 ## Naming Convention used
 * Files: snake_case (all lowercase with _ (underscores) as separators between words)
 * Functions: PascalCase (Each word starts with an uppercase letter)

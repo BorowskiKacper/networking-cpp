@@ -12,35 +12,12 @@
 
 namespace bench
 {
-    void HDRHistogram::Save(std::string file_name)
-    {
-        std::ofstream outfile(file_name);
-        if (outfile.is_open())
-        {
-            outfile << TOP_BUCKETS << " " << SUB_BUCKETS << " \n";
-
-            for (size_t i = 0; i < TOP_BUCKETS * SUB_BUCKETS; i++)
-            {
-                outfile << buckets[i] << '\n';
-            }
-
-            outfile << "samples: " << samples << '\n'
-                    << "total_cycles: " << total_cycles << '\n'
-                    << "clipped: " << clipped << '\n'
-                    << "max_cycles_seen: " << max_cycles_seen << '\n';
-        }
-        else
-        {
-            std::cerr << "Error saving HDR Histrogram to file";
-        }
-    }
-
     uint64_t HDRHistogram::PercentileBucket(double p) const
     {
         uint64_t count = 0;
         assert(0 <= p && p <= 1);
 
-        for (size_t i = 0; i < TOP_BUCKETS * SUB_BUCKETS; i++)
+        for (size_t i = 0; i < BUCKET_COUNT; i++)
         {
             count += buckets[i];
             if (count >= p * samples)
@@ -50,7 +27,7 @@ namespace bench
         }
 
         // Only reachable when clipped samples (which live in no bucket) push the target count past everything recorded in-range
-        return TOP_BUCKETS * SUB_BUCKETS - 1;
+        return BUCKET_COUNT - 1;
     }
 
     HDRHistogram &HDRHistogram::operator+=(const HDRHistogram &other)
@@ -61,7 +38,7 @@ namespace bench
             max_cycles_seen = other.max_cycles_seen;
         clipped += other.clipped;
 
-        for (size_t i = 0; i < TOP_BUCKETS * SUB_BUCKETS; i++)
+        for (size_t i = 0; i < BUCKET_COUNT; i++)
         {
             buckets[i] += other.buckets[i];
         }
@@ -85,17 +62,22 @@ namespace bench
         return significant_digit | precision_digits | mid_bucket;
     }
 
-    void HDRHistogram::PrintSummary(double ns_per_cycle)
+    uint64_t HDRHistogram::PercentileCycles(double p) const
     {
+        return BucketToCycles(PercentileBucket(p));
+    }
 
-        std::cout << "* Processing Time per Message (ns/msg): " << total_cycles * ns_per_cycle / static_cast<double>(samples) << std::endl
+    void HDRHistogram::PrintSummary(double ns_per_cycle) const
+    {
+        // stderr, so that a run can pipe its document to stdout and still be watchable.
+        std::cerr << "* Processing Time per Message (ns/msg): " << total_cycles * ns_per_cycle / static_cast<double>(samples) << std::endl
                   << "* total (msgs): " << samples << std::endl
                   << "* ns_per_cycle (ns/cycle): " << ns_per_cycle << std::endl
                   << "* HDR Histogram (ns/msg): " << std::endl
-                  << "    * p50: " << BucketToCycles(PercentileBucket(0.5)) * ns_per_cycle << std::endl
-                  << "    * p90: " << BucketToCycles(PercentileBucket(0.9)) * ns_per_cycle << std::endl
-                  << "    * p99: " << BucketToCycles(PercentileBucket(0.99)) * ns_per_cycle << std::endl
-                  << "    * p99.9: " << BucketToCycles(PercentileBucket(0.999)) * ns_per_cycle << std::endl
+                  << "    * p50: " << PercentileCycles(0.5) * ns_per_cycle << std::endl
+                  << "    * p90: " << PercentileCycles(0.9) * ns_per_cycle << std::endl
+                  << "    * p99: " << PercentileCycles(0.99) * ns_per_cycle << std::endl
+                  << "    * p99.9: " << PercentileCycles(0.999) * ns_per_cycle << std::endl
                   << "    * max: " << max_cycles_seen * ns_per_cycle << std::endl
                   << "    * clipped (msgs): " << clipped << std::endl;
     }
