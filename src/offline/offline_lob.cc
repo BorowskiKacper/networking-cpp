@@ -15,6 +15,8 @@
 #include <cstring>
 #include <iostream>
 #include <chrono>
+#include <exception>
+#include <string>
 
 namespace
 {
@@ -29,7 +31,7 @@ namespace
         config.AddUInt("lob.order_pool_capacity", 2000000, "live orders the pool can hold");
         config.AddUInt("lob.price_level_pool_capacity", 500ULL * 100 * 10000, "price levels the pool can hold");
         config.AddUInt("lob.max_locates", 10000, "stock locate codes reserved");
-        config.AddUInt("lob.max_order_ref_number", 300000000, "size of the order reference table");
+        config.AddUInt("lob.max_order_ref_number", 310000000, "size of the order reference table; 12/30/2019 reaches 308,631,072");
         config.AddUInt("lob.expected_levels_per_locate", 256, "price levels reserved per locate");
         return config;
     }
@@ -95,23 +97,33 @@ namespace
         size_t total_message_count = 0;
         auto start_time = std::chrono::steady_clock::now();
 
-        while (cursor + sizeof(uint16_t) <= file_end)
+        try
         {
-            uint16_t net_length;
-            memcpy(&net_length, cursor, sizeof(net_length));
-            const uint16_t length = ntohs(net_length);
-            const char *payload = cursor + sizeof(uint16_t);
+            while (cursor + sizeof(uint16_t) <= file_end)
+            {
+                uint16_t net_length;
+                memcpy(&net_length, cursor, sizeof(net_length));
+                const uint16_t length = ntohs(net_length);
+                const char *payload = cursor + sizeof(uint16_t);
 
-            uint8_t msg_type = static_cast<uint8_t>(*payload);
-            uint64_t start_cycle = bench::RdtscStart();
-            fh_lob::ParseMessage(payload, lob);
-            uint64_t end_cycle = bench::RdtscEnd();
+                uint8_t msg_type = static_cast<uint8_t>(*payload);
+                uint64_t start_cycle = bench::RdtscStart();
+                fh_lob::ParseMessage(payload, lob);
+                uint64_t end_cycle = bench::RdtscEnd();
 
-            if (total_message_count > warmup_messages) // warmup skip
-                bench::hist[msg_type].Record(end_cycle - start_cycle);
-            total_message_count++;
+                if (total_message_count > warmup_messages) // warmup skip
+                    bench::hist[msg_type].Record(end_cycle - start_cycle);
+                total_message_count++;
 
-            cursor = payload + length;
+                cursor = payload + length;
+            }
+        }
+        catch (const std::exception &e)
+        {
+            result.Fail("replay aborted at message " + std::to_string(total_message_count) + ": " + e.what());
+            munmap(const_cast<char *>(file), file_size);
+            close(fd);
+            return EXIT_FAILURE;
         }
 
         // Calculate Metrics
