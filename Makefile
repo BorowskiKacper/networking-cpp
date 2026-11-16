@@ -109,7 +109,7 @@ offline-debug:     CXXFLAGS += -DDEBUG -g -O0
 offline-debug:     offline
 
 offline-release:   BUILD_CONFIG := release
-offline-release:   CXXFLAGS += -O2 -march=native -mtune=native -flto -DNDEBUG
+offline-release:   CXXFLAGS += -O3 -march=native -mtune=native -flto -DNDEBUG
 offline-release:   LDFLAGS  += -flto
 offline-release:   offline
 
@@ -153,5 +153,5 @@ clean:
 .PHONY: order-storage-test
 order-storage-test:
 	@mkdir -p $(APP_DIR)
-	$(CXX) $(CXXFLAGS) $(INCLUDE) -O1 -g -o $(APP_DIR)/order_storage_test tests/order_storage_test.cc src/shared/limit_order_book.cc $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -O1 -g -o $(APP_DIR)/order_storage_test tests/order_storage_test.cc src/shared/limit_order_book.cc src/shared/message_parser.cc $(LDFLAGS)
 	$(APP_DIR)/order_storage_test
