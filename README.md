@@ -305,3 +305,20 @@ and `./update_readme_online.sh`, not typed by hand.
 * .inc?
 
 * namespace: fh_lob
+
+Order storage can be selected at startup in both `offline` and `receiver`:
+
+```bash
+./build/apps/offline --input itchmessages/your-feed --lob.order_storage=pool
+./build/apps/offline --input itchmessages/your-feed --lob.order_storage=indexed
+```
+
+`pool` (the default) uses a 4-byte reference lookup entry plus reusable live-order
+storage. `indexed` stores each order at its reference-number index, eliminating
+that lookup dependency. It uses approximately 20 bytes per configured reference
+(6.2 GB for 310 million entries), ignores `lob.order_pool_capacity`, and supports
+at most `UINT32_MAX` reference slots to retain compact 32-bit queue links.
+One LimitOrderBook class stores the CLI selection in a bool and uses runtime
+if/else branches for order access, allocation, and deletion. The selected mode is included in the run configuration.
+
+Run the focused storage correctness checks with `make order-storage-test`.

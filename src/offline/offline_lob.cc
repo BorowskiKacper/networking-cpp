@@ -28,6 +28,7 @@ namespace
         config.AddInt("cpu", 0, "CPU to pin the replay to");
         config.AddUInt("warmup_messages", 10000, "messages parsed before recording starts");
         config.AddUInt("calibration_ms", 50, "sleep length per TSC calibration sample");
+        config.AddString("lob.order_storage", "pool", "order storage: pool or indexed; indexed ignores order_pool_capacity");
         config.AddUInt("lob.order_pool_capacity", 2000000, "live orders the pool can hold");
         config.AddUInt("lob.price_level_pool_capacity", 500ULL * 100 * 10000, "price levels the pool can hold");
         config.AddUInt("lob.max_locates", 10000, "stock locate codes reserved");
@@ -84,7 +85,8 @@ namespace
                                    config.GetUInt("lob.price_level_pool_capacity"),
                                    config.GetUInt("lob.max_locates"),
                                    config.GetUInt("lob.max_order_ref_number"),
-                                   config.GetUInt("lob.expected_levels_per_locate"));
+                                   config.GetUInt("lob.expected_levels_per_locate"),
+                                   config.GetString("lob.order_storage") == "indexed");
 
         bench::pin_to_cpu(cpu_id);
         result.AddPinnedCpu(cpu_id);
@@ -192,6 +194,16 @@ int main(int argc, char *argv[])
     {
         std::cerr << argv[0] << ": " << error << "\n\n"
                   << usage;
+        return EXIT_FAILURE;
+    }
+
+    const auto &storage = config.GetString("lob.order_storage");
+    if (storage != "pool" && storage != "indexed") {
+        std::cerr << "lob.order_storage must be pool or indexed\n";
+        return EXIT_FAILURE;
+    }
+    if (storage == "indexed" && config.GetUInt("lob.max_order_ref_number") > UINT32_MAX) {
+        std::cerr << "indexed order capacity exceeds 32-bit link range\n";
         return EXIT_FAILURE;
     }
 

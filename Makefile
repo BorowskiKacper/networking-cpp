@@ -150,3 +150,8 @@ clean:
         sender   sender-debug   sender-release   sender-info   sender-clean	  \
 		offline  offline-debug  offline-release  offline-info  offline-clean	  \
 		test     spsc-test      spsc-test-tsan   test-clean
+.PHONY: order-storage-test
+order-storage-test:
+	@mkdir -p $(APP_DIR)
+	$(CXX) $(CXXFLAGS) $(INCLUDE) -O1 -g -o $(APP_DIR)/order_storage_test tests/order_storage_test.cc src/shared/limit_order_book.cc $(LDFLAGS)
+	$(APP_DIR)/order_storage_test
