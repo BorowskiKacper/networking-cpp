@@ -8,7 +8,7 @@
 
 namespace fh_lob
 {
-    void LimitOrderBook::ReduceOrderSize(uint64_t order_ref_number, uint32_t shares)
+    void LimitOrderBook::ReduceOrderSize(uint16_t locate, uint64_t order_ref_number, uint32_t shares)
     {
         Order *order;
         if (use_indexed_orders)
@@ -26,7 +26,7 @@ namespace fh_lob
         }
 
         if (order->shares <= shares)
-            DeleteOrder(order_ref_number);
+            DeleteOrder(locate, order_ref_number);
         else
         {
             order->shares -= shares;
@@ -92,22 +92,22 @@ namespace fh_lob
         }
     }
 
-    void LimitOrderBook::ExecuteOrder(uint64_t order_ref_number, uint32_t shares)
+    void LimitOrderBook::ExecuteOrder(uint16_t locate, uint64_t order_ref_number, uint32_t shares)
     {
-        ReduceOrderSize(order_ref_number, shares);
+        ReduceOrderSize(locate, order_ref_number, shares);
     }
 
-    void LimitOrderBook::ExecuteOrderWithPrice(uint64_t order_ref_number, uint32_t shares, [[maybe_unused]] uint32_t price)
+    void LimitOrderBook::ExecuteOrderWithPrice(uint16_t locate, uint64_t order_ref_number, uint32_t shares, [[maybe_unused]] uint32_t price)
     {
-        ReduceOrderSize(order_ref_number, shares);
+        ReduceOrderSize(locate, order_ref_number, shares);
     }
 
-    void LimitOrderBook::CancelOrder(uint64_t order_ref_number, uint32_t shares)
+    void LimitOrderBook::CancelOrder(uint16_t locate, uint64_t order_ref_number, uint32_t shares)
     {
-        ReduceOrderSize(order_ref_number, shares);
+        ReduceOrderSize(locate, order_ref_number, shares);
     }
 
-    void LimitOrderBook::DeleteOrder(uint64_t order_ref_number)
+    void LimitOrderBook::DeleteOrder(uint16_t locate, uint64_t order_ref_number)
     {
         uint32_t order_index = MemoryPool<Order>::NIL;
         Order *order;
@@ -148,10 +148,11 @@ namespace fh_lob
             level->head = order->next;
 
         level->total_volume -= order->shares;
-        if (level->total_volume == 0)
+        if (recycle_empty_levels_ && level->head == MemoryPool<Order>::NIL)
         {
-            // price_level_pool.deallocate(level);
-            // price_level_map.erase(order->price);
+            price_level_maps[locate].erase(level->price);
+            *level = PriceLevel{};
+            price_level_pool.deallocate_index(level_index);
         }
 
         if (use_indexed_orders)
@@ -181,7 +182,7 @@ namespace fh_lob
         }
 
         char side = order->side;
-        DeleteOrder(old_order_ref_number);
+        DeleteOrder(locate, old_order_ref_number);
         AddOrder(locate, new_order_ref_number, side, shares, new_price);
     }
 

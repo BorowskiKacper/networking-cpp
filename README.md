@@ -321,4 +321,19 @@ at most `UINT32_MAX` reference slots to retain compact 32-bit queue links.
 One LimitOrderBook class stores the CLI selection in a bool and uses runtime
 if/else branches for order access, allocation, and deletion. The selected mode is included in the run configuration.
 
+Empty price levels are retained by default. Both `offline` and `receiver` accept
+`--lob.recycle_empty_levels=true` to erase empty levels from their price maps and
+return their slots to the price-level pool:
+
+```bash
+./build/apps/offline --input itchmessages/your-feed --lob.recycle_empty_levels=true
+./build/apps/offline --input itchmessages/your-feed --lob.recycle_empty_levels=false
+```
+
+With recycling enabled, `lob.price_level_pool_capacity` must cover peak concurrent
+levels across all stocks. With recycling disabled, it must cover every distinct
+stock-locate/price pair seen during the session. Both settings keep the pool's
+preallocated memory reserved. The flag is independent of `lob.order_storage` and
+is recorded in each run's configuration.
+
 Run the focused storage correctness checks with `make order-storage-test`.

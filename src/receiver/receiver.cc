@@ -167,6 +167,7 @@ bench::Config ReceiverConfig() {
   config.AddUInt("calibration_ms", 50,
                  "sleep length per TSC calibration sample");
   config.AddString("lob.order_storage", "pool", "order storage: pool or indexed; indexed ignores order_pool_capacity");
+  config.AddBool("lob.recycle_empty_levels", false, "recycle empty price-level slots; false retains levels for reuse at the same price");
   config.AddUInt("lob.order_pool_capacity", 2500000,
                  "live orders the pool can hold");
   config.AddUInt("lob.price_level_pool_capacity", 500ULL * 100 * 10000,
@@ -291,7 +292,8 @@ int RunReceiver(const bench::Config &config, bench::RunResult &result,
                              config.GetUInt("lob.max_locates"),
                              config.GetUInt("lob.max_order_ref_number"),
                              config.GetUInt("lob.expected_levels_per_locate"),
-                             config.GetString("lob.order_storage") == "indexed");
+                             config.GetString("lob.order_storage") == "indexed",
+                             config.GetBool("lob.recycle_empty_levels"));
 
   // Measures queueing across the ring on top of the parse itself.
   bench::HDRHistogram end_to_end_hist;
